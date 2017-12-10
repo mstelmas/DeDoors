@@ -1,4 +1,4 @@
-package org.wsd.agents;
+package org.wsd.agents.helloworld;
 
 import jade.core.Agent;
 import lombok.extern.slf4j.Slf4j;
