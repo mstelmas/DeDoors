@@ -10,6 +10,6 @@ target/
 bin/
 .svn
 *.error
-.mvn/
+!.mvn
 MTPs-Main-Container.txt
 APDescription.txt
