@@ -9,12 +9,15 @@ import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.AgentResolverService;
+import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.ontologies.otp.GenerateOTPRequest;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.otp.OTPVocabulary;
 
 import javax.swing.*;
+import java.util.List;
 
 @Slf4j
 public class LecturerAgent extends GuiAgent {
@@ -22,6 +25,8 @@ public class LecturerAgent extends GuiAgent {
     transient private LecturerAgentGui lecturerAgentGui;
 
     private final Codec codec = new SLCodec();
+
+    private final AgentResolverService agentResolverService = new AgentResolverService(this);
 
     @Override
     protected void setup() {
@@ -42,12 +47,19 @@ public class LecturerAgent extends GuiAgent {
 
     private void requestOTP() {
         final ACLMessage otpRequestMessage = new ACLMessage(ACLMessage.REQUEST);
-        final AID lockAgent1 = new AID("lock-agent-1", AID.ISLOCALNAME);
-        otpRequestMessage.addReceiver(lockAgent1);
+
+        final List<AID> lockAgents = agentResolverService.agentsOfType(AgentTypes.LOCK)
+                .getOrElseThrow(() -> new RuntimeException("Could not retrieve Lock Agents list"));
+
+        if (lockAgents.isEmpty()) {
+            log.info("No Lock Agents found, skipping...");
+        }
+
+        otpRequestMessage.addReceiver(lockAgents.get(0));
         otpRequestMessage.setLanguage(codec.getName());
         otpRequestMessage.setOntology(OTPOntology.instance.getName());
 
-        Try.run(() -> getContentManager().fillContent(otpRequestMessage, new Action(lockAgent1, new GenerateOTPRequest())))
+        Try.run(() -> getContentManager().fillContent(otpRequestMessage, new Action(lockAgents.get(0), new GenerateOTPRequest())))
                 .andThen(() -> {
                             send(otpRequestMessage);
                             log.info("GenerateOTPRequest successfully sent!");
