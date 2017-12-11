@@ -3,9 +3,8 @@ package org.wsd.agents.lecturer;
 import jade.core.AID;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.wsd.AgentResolverService;
-import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.ontologies.otp.OTPMessageFactory;
@@ -13,14 +12,11 @@ import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.otp.OTPVocabulary;
 
 import javax.swing.*;
-import java.util.List;
 
 @Slf4j
 public class LecturerAgent extends GuiAgent {
 
     transient private LecturerAgentGui lecturerAgentGui;
-
-    private final AgentResolverService agentResolverService = new AgentResolverService(this);
 
     private final OTPMessageFactory otpMessageFactory = new OTPMessageFactory(this);
 
@@ -37,21 +33,14 @@ public class LecturerAgent extends GuiAgent {
         final int commandType = guiEvent.getType();
 
         if (commandType == OTPVocabulary.NEW_OTP) {
-            requestOTP();
+            requestOTPFromLock((AID)guiEvent.getAllParameter().next());
         }
     }
 
-    private void requestOTP() {
-        final List<AID> lockAgents = agentResolverService.agentsOfType(AgentTypes.LOCK)
-                .getOrElseThrow(() -> new RuntimeException("Could not retrieve Lock Agents list"));
+    private void requestOTPFromLock(@NonNull final AID lockAgent) {
+        log.info("Requesting OTP from lock: {}", lockAgent);
 
-        if (lockAgents.isEmpty()) {
-            log.info("No Lock Agents found, skipping...");
-            return;
-        }
-
-        /* Send to first available lock agent. TODO: Temporary! */
-        otpMessageFactory.buildGenerateOTPRequest(lockAgents.get(0))
+        otpMessageFactory.buildGenerateOTPRequest(lockAgent)
                 .onSuccess(otpRequestAclMessage -> {
                     send(otpRequestAclMessage);
                     addBehaviour(new AwaitLockResponseBehaviour(this));
@@ -63,5 +52,4 @@ public class LecturerAgent extends GuiAgent {
     public void updateOtpCode(final String newOtpCode) {
         lecturerAgentGui.refreshOtp(newOtpCode);
     }
-
 }

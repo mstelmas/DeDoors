@@ -22,6 +22,9 @@ public class LockAgent extends GuiAgent {
     @Getter
     private final AtomicBoolean isLocked = new AtomicBoolean(true);
 
+    @Getter
+    private final OtpStateService otpStateService = new OtpStateService();
+
     @Override
     protected void setup() {
         getContentManager().registerLanguage(OTPOntology.codec);
@@ -43,13 +46,13 @@ public class LockAgent extends GuiAgent {
             if (isLocked.get()) {
                 final String enteredOtpCode = (String) guiEvent.getAllParameter().next();
 
-                if (OtpStateService.instance().validate(enteredOtpCode).isValid()) {
+                if (otpStateService.validate(enteredOtpCode).isValid()) {
                     log.info("OTP code match - unlocking lock!");
                     isLocked.set(false);
                 }
             } else {
                     isLocked.set(true);
-                    OtpStateService.instance().invalidate();
+                    otpStateService.invalidate();
             }
 
             lockAgentGui.updateLockState();

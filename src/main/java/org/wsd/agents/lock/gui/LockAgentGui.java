@@ -35,7 +35,7 @@ public class LockAgentGui extends JFrame {
 
         buildGui();
 
-        this.setTitle(String.format(LOCK_APP_TITLE_FORMAT, lockAgent.getName()));
+        this.setTitle(String.format(LOCK_APP_TITLE_FORMAT, lockAgent.getLocalName()));
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLocationByPlatform(true);
         this.pack();

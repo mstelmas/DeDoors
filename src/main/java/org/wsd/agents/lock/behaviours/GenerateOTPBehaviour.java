@@ -4,7 +4,6 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lock.LockAgent;
-import org.wsd.agents.lock.otp.OtpStateService;
 import org.wsd.ontologies.otp.OTPMessageFactory;
 
 @Slf4j
@@ -24,7 +23,7 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
 
     @Override
     public void action() {
-        final String otpCode = OtpStateService.instance().generate();
+        final String otpCode = agent.getOtpStateService().generate();
 
         log.info("Generated OTP code for request: {} is: {}", otpRequest, otpCode);
 
@@ -35,7 +34,7 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
                 })
                 .onFailure(ex -> {
                     log.info("Could not send GenerateOTPResponse: {}", ex);
-                    OtpStateService.instance().invalidate();
+                    agent.getOtpStateService().invalidate();
                 });
     }
 }
