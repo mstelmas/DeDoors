@@ -50,10 +50,9 @@ public class LockAgentGui extends JFrame {
     private void buildGui() {
         this.setLayout(new BorderLayout());
 
-        final Pair<Color, String> lockPanelStatus = this.lockPanelStatus.get();
+        updateLockState();
+
         lockStatusPanel.setLayout(new GridBagLayout());
-        lockStatusPanel.setBackground(lockPanelStatus.getLeft());
-        lockStatusLabel.setText(lockPanelStatus.getRight());
         lockStatusPanel.add(lockStatusLabel);
         this.getContentPane().add(lockStatusPanel, BorderLayout.CENTER);
 
@@ -65,9 +64,6 @@ public class LockAgentGui extends JFrame {
 
         lockPanel.add(otpCodeTextField);
 
-        final Pair<Boolean, String> lockButtonStatus = this.unlockButtonStatus.get();
-        unlockButton.setText(lockButtonStatus.getRight());
-        unlockButton.setEnabled(lockButtonStatus.getLeft());
         lockPanel.add(unlockButton);
         this.getContentPane().add(lockPanel, BorderLayout.SOUTH);
     }
@@ -80,12 +76,20 @@ public class LockAgentGui extends JFrame {
         }
     };
 
-    private Supplier<Pair<Boolean, String>> unlockButtonStatus = () -> {
+    private Supplier<String> unlockButtonStatus = () -> {
         if (lockAgent.getIsLocked().get()) {
-            return Pair.of(true, "Unlock");
+            return "Unlock";
         } else {
-            return Pair.of(false, "Lock");
+            return "Lock";
         }
     };
+
+    public void updateLockState() {
+        unlockButton.setText(this.unlockButtonStatus.get());
+
+        final Pair<Color, String> lockPanelStatus = this.lockPanelStatus.get();
+        lockStatusPanel.setBackground(lockPanelStatus.getLeft());
+        lockStatusLabel.setText(lockPanelStatus.getRight());
+    }
 
 }

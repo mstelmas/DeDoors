@@ -1,8 +1,6 @@
 package org.wsd.agents.lecturer;
 
 import io.vavr.control.Try;
-import jade.content.lang.Codec;
-import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.gui.GuiAgent;
@@ -11,6 +9,7 @@ import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
+import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.ontologies.otp.GenerateOTPRequest;
 import org.wsd.ontologies.otp.OTPOntology;
@@ -24,13 +23,11 @@ public class LecturerAgent extends GuiAgent {
 
     transient private LecturerAgentGui lecturerAgentGui;
 
-    private final Codec codec = new SLCodec();
-
     private final AgentResolverService agentResolverService = new AgentResolverService(this);
 
     @Override
     protected void setup() {
-        getContentManager().registerLanguage(codec);
+        getContentManager().registerLanguage(OTPOntology.codec);
         getContentManager().registerOntology(OTPOntology.instance);
 
         SwingUtilities.invokeLater(() -> lecturerAgentGui = new LecturerAgentGui(this));
@@ -56,15 +53,20 @@ public class LecturerAgent extends GuiAgent {
         }
 
         otpRequestMessage.addReceiver(lockAgents.get(0));
-        otpRequestMessage.setLanguage(codec.getName());
+        otpRequestMessage.setLanguage(OTPOntology.codec.getName());
         otpRequestMessage.setOntology(OTPOntology.instance.getName());
 
         Try.run(() -> getContentManager().fillContent(otpRequestMessage, new Action(lockAgents.get(0), new GenerateOTPRequest())))
                 .andThen(() -> {
                             send(otpRequestMessage);
+                            addBehaviour(new AwaitLockResponseBehaviour(this));
                             log.info("GenerateOTPRequest successfully sent!");
                         })
                 .onFailure(ex -> log.info("Could not send GenerateOTPRequest: {}", ex));
+    }
+
+    public void updateOtpCode(final String newOtpCode) {
+        lecturerAgentGui.refreshOtp(newOtpCode);
     }
 
 }

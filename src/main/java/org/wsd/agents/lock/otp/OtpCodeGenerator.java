@@ -1,10 +1,10 @@
-package org.wsd.agents.lock;
+package org.wsd.agents.lock.otp;
 
 import java.util.Random;
 
-public class OtpCodeGenerator {
+class OtpCodeGenerator {
 
-    public static final int MAX_OTP_CODE = 1000000;
+    private static final int MAX_OTP_CODE = 1000000;
 
     private Random random = new Random();
 

@@ -7,6 +7,7 @@ import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.ontologies.otp.OTPVocabulary;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 @Slf4j
 public class LecturerAgentGui extends JFrame {
@@ -14,6 +15,8 @@ public class LecturerAgentGui extends JFrame {
     private final static String PREFERRED_LOOK_AND_FEEL = "Nimbus";
     private final static String LECTURER_APP_TITLE_FORMAT = "Lecturer Reservation App (%s)";
 
+    private final TitledBorder lockManagementPanelBorder = BorderFactory.createTitledBorder("Lock management");
+    private final JTextField receivedOtpCodeTextField = new JTextField(10);
     private final JButton requestOTPButton = new JButton("Request OTP");
 
     private LecturerAgent lecturerAgent = null;
@@ -41,7 +44,25 @@ public class LecturerAgentGui extends JFrame {
     private void buildGui() {
         requestOTPButton.addActionListener(actionEvent -> lecturerAgent.postGuiEvent(new GuiEvent(this, OTPVocabulary.NEW_OTP)));
 
-        this.getContentPane().add(requestOTPButton);
+        this.getContentPane().add(buildLockManagementPanel());
+    }
+
+    private JPanel buildLockManagementPanel() {
+        final JPanel lockManagementPanel = new JPanel();
+
+        lockManagementPanel.setBorder(lockManagementPanelBorder);
+        lockManagementPanel.add(requestOTPButton);
+
+        receivedOtpCodeTextField.setEnabled(false);
+        receivedOtpCodeTextField.setEditable(false);
+
+        lockManagementPanel.add(receivedOtpCodeTextField);
+
+        return lockManagementPanel;
+    }
+
+    public void refreshOtp(final String otpCode) {
+        receivedOtpCodeTextField.setText(otpCode);
     }
 
 }
