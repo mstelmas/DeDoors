@@ -11,3 +11,12 @@
     ```bash
     ./startAgents.sh
     ```
+
+## Debugging agents
+
+1. Configure debugger to target Remote at localhost:9009
+2. Start agent containers:
+    ```bash
+    ./debugAgents.sh
+    ```
+3. Connect debugger
