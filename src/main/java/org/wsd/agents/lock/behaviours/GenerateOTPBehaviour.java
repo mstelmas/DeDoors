@@ -1,14 +1,11 @@
 package org.wsd.agents.lock.behaviours;
 
-import io.vavr.control.Try;
-import jade.content.onto.basic.Action;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lock.LockAgent;
 import org.wsd.agents.lock.otp.OtpStateService;
-import org.wsd.ontologies.otp.GenerateOTPResponse;
-import org.wsd.ontologies.otp.OTPOntology;
+import org.wsd.ontologies.otp.OTPMessageFactory;
 
 @Slf4j
 public class GenerateOTPBehaviour extends OneShotBehaviour {
@@ -16,11 +13,13 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
     private final ACLMessage otpRequest;
 
     private final LockAgent agent;
+    private final OTPMessageFactory otpMessageFactory;
 
     public GenerateOTPBehaviour(final LockAgent agent, final ACLMessage otpRequest) {
         super(agent);
         this.agent = agent;
         this.otpRequest = otpRequest;
+        this.otpMessageFactory = new OTPMessageFactory(agent);
     }
 
     @Override
@@ -29,15 +28,9 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
 
         log.info("Generated OTP code for request: {} is: {}", otpRequest, otpCode);
 
-        final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.INFORM_IF);
-
-        otpResponseMessage.addReceiver(otpRequest.getSender());
-        otpResponseMessage.setLanguage(OTPOntology.codec.getName());
-        otpResponseMessage.setOntology(OTPOntology.instance.getName());
-
-        Try.run(() -> agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequest.getSender(), new GenerateOTPResponse().withOtpCode(otpCode))))
-                .andThen(() -> {
-                    agent.send(otpResponseMessage);
+        otpMessageFactory.buildGenerateOTPResponse(otpRequest.getSender(), otpCode)
+                .onSuccess(otpResponseAclMessage -> {
+                    agent.send(otpResponseAclMessage);
                     log.info("GenerateOTPResponse successfully sent!");
                 })
                 .onFailure(ex -> {
