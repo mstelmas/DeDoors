@@ -12,7 +12,9 @@ import org.wsd.agents.AgentTypes;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @RequiredArgsConstructor
 public class AgentResolverService {
@@ -32,4 +34,10 @@ public class AgentResolverService {
                 );
     }
 
+    public AID getRandomAgent(final AgentTypes agentType) {
+        List<AID> agents = agentsOfType(agentType)
+                    .getOrElse(Collections.emptyList());
+        Random generator = new Random();
+        return agents.get(generator.nextInt(agents.size()));
+    }
 }

@@ -1,5 +1,15 @@
 package org.wsd.agents.lock.behaviours;
 
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
+import static io.vavr.API.Match;
+import static io.vavr.API.run;
+import static io.vavr.Predicates.instanceOf;
+
+import org.wsd.agents.lock.LockAgent;
+import org.wsd.ontologies.otp.GenerateOTPRequest;
+import org.wsd.ontologies.otp.OTPOntology;
+
 import io.vavr.control.Try;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -8,24 +18,18 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
-import org.wsd.agents.lock.LockAgent;
-import org.wsd.ontologies.otp.GenerateOTPRequest;
-import org.wsd.ontologies.otp.OTPOntology;
-
-import static io.vavr.API.*;
-import static io.vavr.Predicates.instanceOf;
 
 @Slf4j
-public class LockMessageHandler extends CyclicBehaviour {
+public class LockOTPMessageHandler extends CyclicBehaviour {
 
     private final MessageTemplate OTP_ONTOLOGY_MESSAGE_TEMPLATE = MessageTemplate.and(
             MessageTemplate.MatchLanguage(OTPOntology.codec.getName()),
             MessageTemplate.MatchOntology(OTPOntology.instance.getName())
     );
-
+    
     private final LockAgent agent;
 
-    public LockMessageHandler(final LockAgent agent) {
+    public LockOTPMessageHandler(final LockAgent agent) {
         super(agent);
         this.agent = agent;
     }
@@ -33,7 +37,7 @@ public class LockMessageHandler extends CyclicBehaviour {
     @Override
     public void action() {
         final ACLMessage message = agent.receive(OTP_ONTOLOGY_MESSAGE_TEMPLATE);
-
+        
         if (message == null) {
             block();
             return;

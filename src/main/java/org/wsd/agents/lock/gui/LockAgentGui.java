@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.wsd.GuiLookAndFeelManager;
 import org.wsd.agents.lock.LockAgent;
+import org.wsd.agents.lock.LockGuiEvents;
 import org.wsd.ontologies.otp.OTPVocabulary;
 
 import javax.swing.*;
@@ -57,7 +58,7 @@ public class LockAgentGui extends JFrame {
         this.getContentPane().add(lockStatusPanel, BorderLayout.CENTER);
 
         unlockButton.addActionListener(actionEvent -> {
-            final GuiEvent validateOtpEvent = new GuiEvent(this, OTPVocabulary.VALIDATE_OTP);
+            final GuiEvent validateOtpEvent = new GuiEvent(this, LockGuiEvents.VALIDATE_OTP);
             validateOtpEvent.addParameter(otpCodeTextField.getText());
             lockAgent.postGuiEvent(validateOtpEvent);
         });
