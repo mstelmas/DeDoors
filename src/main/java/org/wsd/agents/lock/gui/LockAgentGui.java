@@ -6,7 +6,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.wsd.GuiLookAndFeelManager;
 import org.wsd.agents.lock.LockAgent;
 import org.wsd.agents.lock.LockGuiEvents;
-import org.wsd.ontologies.otp.OTPVocabulary;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +39,8 @@ public class LockAgentGui extends JFrame {
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLocationByPlatform(true);
         this.pack();
-        this.setVisible(true);
+        /* TODO: Lock GUI temporary invisible for testing purposes */
+//        this.setVisible(true);
     }
 
     /* For easier GUI development */

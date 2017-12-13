@@ -29,6 +29,11 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 			as.add(DATE_TO, (PrimitiveSchema) getSchema(BasicOntology.DATE), ObjectSchema.MANDATORY);
 			as.add(NUMBER_OF_PARTICIPANTS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			as.add(IS_WEEKLY, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN), ObjectSchema.MANDATORY);
+
+			add(new ConceptSchema(RESERVATION_OFFER), ReservationOffer.class);
+
+			final ConceptSchema reservationOfferConceptSchema = (ConceptSchema) getSchema(RESERVATION_OFFER);
+			reservationOfferConceptSchema.add(RESERVATION_OFFER_SCORE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
 		}).onFailure(ex -> log.error("Could not create Reservation ontology schema {}", ex));
 	}
 

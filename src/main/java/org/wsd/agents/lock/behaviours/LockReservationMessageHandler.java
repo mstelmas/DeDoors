@@ -1,31 +1,31 @@
 package org.wsd.agents.lock.behaviours;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
-import static io.vavr.API.Match;
-import static io.vavr.API.run;
-import static io.vavr.Predicates.instanceOf;
-
-import org.wsd.agents.lock.LockAgent;
-import org.wsd.ontologies.otp.GenerateOTPRequest;
-import org.wsd.ontologies.reservation.ReservationDataRequest;
-import org.wsd.ontologies.reservation.ReservationOntology;
-
 import io.vavr.control.Try;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.onto.basic.Action;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.lock.LockAgent;
+import org.wsd.ontologies.reservation.ReservationDataRequest;
+import org.wsd.ontologies.reservation.ReservationOntology;
+
+import static io.vavr.API.*;
+import static io.vavr.Predicates.instanceOf;
 
 @Slf4j
 public class LockReservationMessageHandler extends CyclicBehaviour {
 
-	private final MessageTemplate RESERVATION_MESSAGE_TEMPLATE = MessageTemplate.and(
-			MessageTemplate.MatchLanguage(ReservationOntology.codec.getName()),
-			MessageTemplate.MatchOntology(ReservationOntology.instance.getName()));
+	private final MessageTemplate NEGOTIATOR_MESSAGE_TEMPLATE = MessageTemplate.and(
+	        MessageTemplate.and(
+                    MessageTemplate.MatchLanguage(ReservationOntology.codec.getName()),
+                    MessageTemplate.MatchOntology(ReservationOntology.instance.getName())
+            ),
+            /* Reservation negotiations should be handled in a separate handler! */
+            MessageTemplate.not(MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET)));
 
 	private final LockAgent agent;
 
@@ -36,7 +36,7 @@ public class LockReservationMessageHandler extends CyclicBehaviour {
 
 	@Override
 	public void action() {
-		final ACLMessage message = agent.receive(RESERVATION_MESSAGE_TEMPLATE);
+		final ACLMessage message = agent.receive(NEGOTIATOR_MESSAGE_TEMPLATE);
 
 		if (message == null) {
 			block();
@@ -58,7 +58,7 @@ public class LockReservationMessageHandler extends CyclicBehaviour {
 		case ACLMessage.REQUEST:
 			Match(action).of(
 					Case($(instanceOf(ReservationDataRequest.class)), run(
-							() -> agent.addBehaviour(new PerformCNPbehaviour(agent, (ReservationDataRequest) action)))),
+							() -> agent.addBehaviour(new PerformReservationCNPBehaviour(agent, (ReservationDataRequest) action)))),
 					Case($(), o -> run(() -> replyNotUnderstood(message))));
 			break;
 

@@ -20,24 +20,27 @@ import java.util.Collections;
 public class AgentResolverService {
 
     private final Agent agent;
+    private final Random generator = new Random();
 
-    public Try<List<AID>> agentsOfType(final AgentTypes agentType) {
+    public List<AID> agentsOfType(final AgentTypes agentTypes) {
+        return tryToGetAgentsOfType(agentTypes).getOrElse(Collections.emptyList());
+    }
+
+    public AID getRandomAgent(final AgentTypes agentType) {
+        List<AID> agents = agentsOfType(agentType);
+        return agents.get(generator.nextInt(agents.size()));
+    }
+
+    private Try<List<AID>> tryToGetAgentsOfType(final AgentTypes agentType) {
         final SearchConstraints searchConstraints = new SearchConstraints();
         searchConstraints.setMaxResults(-1L);
 
         return Try.of(() -> Arrays.asList(AMSService.search(agent, new AMSAgentDescription(), searchConstraints)))
                 .map(amsAgentDescriptions ->
-                    amsAgentDescriptions.stream()
-                            .map(AMSAgentDescription::getName)
-                            .filter(aid -> StringUtils.startsWith(aid.getName(), agentType.getName()))
-                            .collect(Collectors.toList())
+                        amsAgentDescriptions.stream()
+                                .map(AMSAgentDescription::getName)
+                                .filter(aid -> StringUtils.startsWith(aid.getName(), agentType.getName()))
+                                .collect(Collectors.toList())
                 );
-    }
-
-    public AID getRandomAgent(final AgentTypes agentType) {
-        List<AID> agents = agentsOfType(agentType)
-                    .getOrElse(Collections.emptyList());
-        Random generator = new Random();
-        return agents.get(generator.nextInt(agents.size()));
     }
 }

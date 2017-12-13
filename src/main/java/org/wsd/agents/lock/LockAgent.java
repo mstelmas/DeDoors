@@ -1,21 +1,22 @@
 package org.wsd.agents.lock;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.SwingUtilities;
-
+import jade.domain.FIPANames;
+import jade.gui.GuiAgent;
+import jade.gui.GuiEvent;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lock.behaviours.LockOTPMessageHandler;
 import org.wsd.agents.lock.behaviours.LockReservationMessageHandler;
+import org.wsd.agents.lock.behaviours.ReservationCNPLockBehaviour;
 import org.wsd.agents.lock.gui.LockAgentGui;
 import org.wsd.agents.lock.otp.OtpStateService;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.reservation.ReservationOntology;
 
-import jade.core.behaviours.SequentialBehaviour;
-import jade.gui.GuiAgent;
-import jade.gui.GuiEvent;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import javax.swing.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class LockAgent extends GuiAgent {
@@ -28,6 +29,17 @@ public class LockAgent extends GuiAgent {
     @Getter
     private final OtpStateService otpStateService = new OtpStateService();
 
+    private final MessageTemplate RESERVATION_CNP_MESSAGE_TEMPLATE = MessageTemplate.and(
+            MessageTemplate.and(
+                    MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
+                    MessageTemplate.MatchPerformative(ACLMessage.CFP)
+            ),
+            MessageTemplate.and(
+                    MessageTemplate.MatchLanguage(ReservationOntology.codec.getName()),
+                    MessageTemplate.MatchOntology(ReservationOntology.instance.getName())
+            )
+    );
+
     @Override
     protected void setup() {
         getContentManager().registerLanguage(OTPOntology.codec);
@@ -38,6 +50,7 @@ public class LockAgent extends GuiAgent {
         
         addBehaviour(new LockOTPMessageHandler(this));
         addBehaviour(new LockReservationMessageHandler(this));
+        addBehaviour(new ReservationCNPLockBehaviour(this, RESERVATION_CNP_MESSAGE_TEMPLATE));
 
         SwingUtilities.invokeLater(() -> lockAgentGui = new LockAgentGui(this));
     }

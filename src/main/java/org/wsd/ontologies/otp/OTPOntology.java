@@ -26,8 +26,8 @@ public class OTPOntology extends Ontology implements OTPVocabulary {
 
            add(new ConceptSchema(GENERATED_OTP), GenerateOTPResponse.class);
 
-            final ConceptSchema generatedOTPConceptSchema = (ConceptSchema) getSchema(GENERATED_OTP);
-            generatedOTPConceptSchema.add(GENERATED_OTP_CODE, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+           final ConceptSchema generatedOTPConceptSchema = (ConceptSchema) getSchema(GENERATED_OTP);
+           generatedOTPConceptSchema.add(GENERATED_OTP_CODE, (PrimitiveSchema) getSchema(BasicOntology.STRING));
 
         }).onFailure(ex -> log.error("Could not create OTP ontology schema {}", ex));
     }

@@ -8,4 +8,7 @@ public interface ReservationVocabulary {
 	public static final String DATE_TO = "dateTo";
 	public static final String NUMBER_OF_PARTICIPANTS = "numberOfParticipants";
 	public static final String IS_WEEKLY = "isWeekly";
+
+	public static final String RESERVATION_OFFER = "ReservationOffer";
+	public static final String RESERVATION_OFFER_SCORE = "score";
 }

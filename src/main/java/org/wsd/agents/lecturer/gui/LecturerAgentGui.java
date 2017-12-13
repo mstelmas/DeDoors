@@ -9,13 +9,11 @@ import org.wsd.GuiLookAndFeelManager;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.agents.lecturer.LecturerGuiEvents;
-import org.wsd.ontologies.otp.OTPVocabulary;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collections;
 import java.util.Date;
 
 import static io.vavr.API.$;
@@ -122,7 +120,7 @@ public class LecturerAgentGui extends JFrame {
 
 		availableLockAgentsComboBox.setRenderer(availableLockAgentsComboBoxRenderer);
 		availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(
-				agentResolverService.agentsOfType(AgentTypes.LOCK).getOrElse(Collections.emptyList()).toArray()));
+				agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
 		lockManagementPanel.add(availableLockAgentsComboBox);
 
 		lockManagementPanel.setBorder(lockManagementPanelBorder);
