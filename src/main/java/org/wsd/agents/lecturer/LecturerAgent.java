@@ -11,6 +11,7 @@ import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
+import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.agents.lecturer.reservations.ReservationsStateService;
 import org.wsd.ontologies.otp.OTPMessageFactory;
 import org.wsd.ontologies.otp.OTPOntology;
@@ -45,30 +46,44 @@ public class LecturerAgent extends GuiAgent {
 	protected void onGuiEvent(final GuiEvent guiEvent) {
 		final int commandType = guiEvent.getType();
 
-		if (commandType == LecturerGuiEvents.NEW_OTP) {
-			requestOTPFromLock((AID) guiEvent.getAllParameter().next());
-		}
+		if (commandType == LecturerGuiEvents.NEW_OTP_FOR_LECTURER) {
+			requestOTPFromLock((Reservation) guiEvent.getAllParameter().next(), UserAgentRoles.USER_LECTURER);
+		} else if (commandType == LecturerGuiEvents.NEW_OTP_FOR_TECHNICIAN) {
+		    /*
+		       TODO: This is a temporal hack to reuse existing metod for generating
+		             OTP for USER_LECTURER.
 
-		if (commandType == LecturerGuiEvents.ASK_FOR_RESERVATION) {
+		             We create a dummy reservation for USER_TECHNICIAN, but when
+		             the permissions are done this should not be necessary because
+		             user role will be checked by a lock
+		     */
+            requestOTPFromLock(new Reservation(1234, (AID)guiEvent.getAllParameter().next()), UserAgentRoles.USER_TECHNICIAN);
+        } else if (commandType == LecturerGuiEvents.ASK_FOR_RESERVATION) {
 			ReservationDataRequest data = (ReservationDataRequest) guiEvent.getAllParameter().next();
 			askRandomLockForReservation(data);
 			log.info("Reservatuon data: {}", data);
 		}
 	}
 
-	private void requestOTPFromLock(@NonNull final AID lockAgent) {
-		log.info("Requesting OTP from lock: {}", lockAgent);
+	/* TODO: Refactor ugly enum passing... */
+	private void requestOTPFromLock(@NonNull final Reservation reservation, final UserAgentRoles userAgentRole) {
+		log.info("Requesting OTP for reservation: {}", reservation);
 
 		/* TODO: Picking specific reservation for OTP code request */
-		otpMessageFactory.buildGenerateOTPRequest(lockAgent, 12345).onSuccess(otpRequestAclMessage -> {
+		otpMessageFactory.buildGenerateOTPRequest(reservation.getLock(), reservation.getId()).onSuccess(otpRequestAclMessage -> {
 			send(otpRequestAclMessage);
-			addBehaviour(new AwaitLockResponseBehaviour(this));
+			addBehaviour(new AwaitLockResponseBehaviour(this, userAgentRole));
 			log.info("GenerateOTPRequest successfully sent!");
 		}).onFailure(ex -> log.info("Could not send GenerateOTPRequest: {}", ex));
 	}
 
-	public void updateOtpCode(final Either<String, String> otpCodeOrRefusalReasons) {
-		lecturerAgentGui.refreshOtp(otpCodeOrRefusalReasons);
+	/* TODO: Refactor ;/ */
+	public void updateOtpCode(final Either<String, String> otpCodeOrRefusalReasons, final UserAgentRoles userAgentRole) {
+	    if (userAgentRole == UserAgentRoles.USER_LECTURER) {
+            lecturerAgentGui.refreshLecturerOtp(otpCodeOrRefusalReasons);
+        } else if (userAgentRole == UserAgentRoles.USER_TECHNICIAN){
+	        lecturerAgentGui.refreshTechnicianOtp(otpCodeOrRefusalReasons);
+        }
 	}
 
 	private void askRandomLockForReservation(@NonNull final ReservationDataRequest data) {

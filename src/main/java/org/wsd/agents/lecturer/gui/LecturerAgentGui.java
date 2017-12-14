@@ -29,15 +29,21 @@ public class LecturerAgentGui extends JFrame {
 	private final static String PREFERRED_LOOK_AND_FEEL = "Nimbus";
 	private final static String LECTURER_APP_TITLE_FORMAT = "Lecturer Reservation App (%s)";
 
-	private final TitledBorder lockManagementPanelBorder = BorderFactory.createTitledBorder("Lock management");
-	private final JTextField receivedOtpCodeTextField = new JTextField(10);
-	private final JButton requestOTPButton = new JButton("Request OTP");
+    /* Lock management GUI for USER_LECTURER */
+	private final TitledBorder lecturerLockManagementPanelBorder = BorderFactory.createTitledBorder("Lock management (USER_LECTURER)");
+	private final JTextField lecturerReceivedOtpCodeTextField = new JTextField(10);
+	private final JButton lecturerRequestOTPButton = new JButton("Request OTP");
 	/* TODO: Runtime lock agents discovery if really needed */
 	private final JComboBox<AID> availableLockAgentsComboBox = new JComboBox<>();
     private final JList<Reservation> agentReservationsList = new JList<>();
     private final JScrollPane agentReservationsScrollPanel = new JScrollPane();
 
-	private final TitledBorder askReservationsPanelBorder = BorderFactory.createTitledBorder("Reservation management");
+    /* Lock management GUI for USER_TECHNICIAN */
+    private final TitledBorder technicianLockManagementPanelBorder = BorderFactory.createTitledBorder("Lock management (USER_TECHNICIAN)");
+    private final JTextField technicianReceivedOtpCodeTextField = new JTextField(10);
+    private final JButton technicianRequestOTPButton = new JButton("Open lock");
+
+	private final TitledBorder askReservationsPanelBorder = BorderFactory.createTitledBorder("Reservation management (USER_LECTURER)");
 	private final JButton askForReservationButton = new JButton("Ask for reservation");
 	private final JSpinner startReservationDateTimeSpinner = new JSpinner(new SpinnerDateModel());
 	private final JSpinner endReservationDateTimeSpinner = new JSpinner(new SpinnerDateModel());
@@ -72,17 +78,30 @@ public class LecturerAgentGui extends JFrame {
 	}
 
 	private void buildGui() {
-		requestOTPButton.addActionListener(actionEvent -> {
-			final GuiEvent requestNewOtpEvent = new GuiEvent(this, LecturerGuiEvents.NEW_OTP);
-			requestNewOtpEvent.addParameter(availableLockAgentsComboBox.getSelectedItem());
+		lecturerRequestOTPButton.addActionListener(actionEvent -> {
+		    if (agentReservationsList.getSelectedValue() == null) {
+		        JOptionPane.showMessageDialog(this, "No reservation selected from list");
+		        return;
+            }
+
+			final GuiEvent requestNewOtpEvent = new GuiEvent(this, LecturerGuiEvents.NEW_OTP_FOR_LECTURER);
+			requestNewOtpEvent.addParameter(agentReservationsList.getSelectedValue());
 			lecturerAgent.postGuiEvent(requestNewOtpEvent);
 		});
+
 		askForReservationButton.addActionListener(actionEvent -> {
 			final GuiEvent askForReservationEvent = new GuiEvent(this, LecturerGuiEvents.ASK_FOR_RESERVATION);
 			ReservationDataRequest reservationData = readReservationData();
 			askForReservationEvent.addParameter(reservationData);
 			lecturerAgent.postGuiEvent(askForReservationEvent);
 		});
+
+        technicianRequestOTPButton.addActionListener(actionEvent -> {
+            final GuiEvent requestNewOtpEvent = new GuiEvent(this, LecturerGuiEvents.NEW_OTP_FOR_TECHNICIAN);
+            requestNewOtpEvent.addParameter(availableLockAgentsComboBox.getSelectedItem());
+            lecturerAgent.postGuiEvent(requestNewOtpEvent);
+        });
+
 		this.getContentPane().setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
 		this.getContentPane().add(buildReservationsPanel());
 		this.getContentPane().add(buildLockManagementPanel());
@@ -120,27 +139,49 @@ public class LecturerAgentGui extends JFrame {
 	}
 
 	private JPanel buildLockManagementPanel() {
-		final JPanel lockManagementPanel = new JPanel();
+		final JPanel mainLockManagementPanel = new JPanel();
+		mainLockManagementPanel.setLayout(new BoxLayout(mainLockManagementPanel, BoxLayout.Y_AXIS));
+
+        mainLockManagementPanel.add(buildLecturerLockManagementPanel());
+        mainLockManagementPanel.add(buildTechnicianLockManagementPanel());
+
+		return mainLockManagementPanel;
+	}
+
+	private JPanel buildLecturerLockManagementPanel() {
+        final JPanel lecturerLockManagementPanel = new JPanel();
 
         agentReservationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         agentReservationsList.setCellRenderer(agentReservationsListRenderer);
         agentReservationsScrollPanel.setViewportView(agentReservationsList);
-        lockManagementPanel.add(agentReservationsScrollPanel);
+        lecturerLockManagementPanel.add(agentReservationsScrollPanel);
 
         refreshAvailableReservations();
 
+        lecturerLockManagementPanel.setBorder(lecturerLockManagementPanelBorder);
+        lecturerLockManagementPanel.add(lecturerRequestOTPButton);
+
+        lecturerReceivedOtpCodeTextField.setEditable(false);
+        lecturerLockManagementPanel.add(lecturerReceivedOtpCodeTextField);
+
+        return lecturerLockManagementPanel;
+    }
+
+    private JPanel buildTechnicianLockManagementPanel() {
+        final JPanel technicianLockManagementPanel = new JPanel();
+
         availableLockAgentsComboBox.setRenderer(availableLockAgentsComboBoxRenderer);
         availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
-        lockManagementPanel.add(availableLockAgentsComboBox);
+        technicianLockManagementPanel.add(availableLockAgentsComboBox);
 
-        lockManagementPanel.setBorder(lockManagementPanelBorder);
-        lockManagementPanel.add(requestOTPButton);
+        technicianLockManagementPanel.setBorder(technicianLockManagementPanelBorder);
+        technicianLockManagementPanel.add(technicianRequestOTPButton);
 
-        receivedOtpCodeTextField.setEditable(false);
-        lockManagementPanel.add(receivedOtpCodeTextField);
+        technicianReceivedOtpCodeTextField.setEditable(false);
+        technicianLockManagementPanel.add(technicianReceivedOtpCodeTextField);
 
-		return lockManagementPanel;
-	}
+        return technicianLockManagementPanel;
+    }
 
 	public void refreshAvailableReservations() {
         final DefaultListModel<Reservation> availableReservationsListModel = new DefaultListModel<>();
@@ -148,15 +189,23 @@ public class LecturerAgentGui extends JFrame {
         agentReservationsList.setModel(availableReservationsListModel);
     }
 
-	public void refreshOtp(final Either<String, String> otpCodeOrRefusalReasons) {
-		receivedOtpCodeTextField.setText("");
-		otpCodeOrRefusalReasons
-				.map(otpCode -> {
-					receivedOtpCodeTextField.setText(otpCode);
-					return otpCode;
-				})
-				.orElseRun(refusalReasons -> JOptionPane.showMessageDialog(this, "OTP generation refused because of: " + refusalReasons));
+	public void refreshLecturerOtp(final Either<String, String> otpCodeOrRefusalReasons) {
+		refreshOtp(otpCodeOrRefusalReasons, lecturerReceivedOtpCodeTextField);
 	}
+
+	public void refreshTechnicianOtp(final Either<String, String> otpCodeOrRefusalReasons) {
+        refreshOtp(otpCodeOrRefusalReasons, technicianReceivedOtpCodeTextField);
+    }
+
+    private void  refreshOtp(final Either<String, String> otpCodeOrRefusalReasons, final JTextField otpCodeTextField) {
+        otpCodeTextField.setText("");
+        otpCodeOrRefusalReasons
+                .map(otpCode -> {
+                    otpCodeTextField.setText(otpCode);
+                    return otpCode;
+                })
+                .orElseRun(refusalReasons -> JOptionPane.showMessageDialog(this, "OTP generation refused because of: " + refusalReasons));
+    }
 
 	private final ListCellRenderer availableLockAgentsComboBoxRenderer = new DefaultListCellRenderer() {
 		@Override

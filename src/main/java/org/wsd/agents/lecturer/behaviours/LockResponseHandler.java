@@ -9,6 +9,7 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lecturer.LecturerAgent;
+import org.wsd.agents.lecturer.UserAgentRoles;
 import org.wsd.ontologies.otp.GenerateOTPResponse;
 import org.wsd.ontologies.otp.RefuseOTPGenerationResponse;
 
@@ -22,10 +23,12 @@ public class LockResponseHandler extends SimpleBehaviour {
     /* TODO: add sender filter */
 
     private final LecturerAgent agent;
+    private final UserAgentRoles agentRole;
 
-    public LockResponseHandler(final LecturerAgent agent) {
+    public LockResponseHandler(final LecturerAgent agent, final UserAgentRoles userAgentRole) {
         super(agent);
         this.agent = agent;
+        this.agentRole = userAgentRole;
     }
 
     @Override
@@ -72,12 +75,12 @@ public class LockResponseHandler extends SimpleBehaviour {
 
     private void handleReceivedOtpCode(final GenerateOTPResponse generateOTPResponse) {
         log.info("Received OTP: {}", generateOTPResponse.getOtpCode());
-        agent.updateOtpCode(Either.right(generateOTPResponse.getOtpCode()));
+        agent.updateOtpCode(Either.right(generateOTPResponse.getOtpCode()), agentRole);
     }
 
     private void handleRefusedOtpCodeGeneration(final RefuseOTPGenerationResponse refuseOTPGenerationResponse) {
         log.info("OTP code generation request refused because of: {}", refuseOTPGenerationResponse.getRejectionReasons());
-        agent.updateOtpCode(Either.left(refuseOTPGenerationResponse.getRejectionReasons()));
+        agent.updateOtpCode(Either.left(refuseOTPGenerationResponse.getRejectionReasons()), agentRole);
     }
 
     @Override
