@@ -1,4 +1,4 @@
-package org.wsd.agents.lock;
+package org.wsd.agents.lock.reservations;
 
 import lombok.NonNull;
 import org.wsd.ontologies.reservation.ReservationDataRequest;

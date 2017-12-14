@@ -1,9 +1,8 @@
 package org.wsd.ontologies.otp;
 
-import jade.content.AgentAction;
+import jade.content.Concept;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Wither;
 
@@ -11,6 +10,6 @@ import lombok.experimental.Wither;
 @AllArgsConstructor
 @Wither
 @Data
-public class GenerateOTPRequest implements AgentAction {
-    @Getter private Integer reservationId;
+public class RefuseOTPGenerationResponse implements Concept {
+    private String rejectionReasons;
 }

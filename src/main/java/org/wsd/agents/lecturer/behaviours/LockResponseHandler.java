@@ -1,5 +1,6 @@
 package org.wsd.agents.lecturer.behaviours;
 
+import io.vavr.control.Either;
 import io.vavr.control.Try;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -9,6 +10,7 @@ import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.ontologies.otp.GenerateOTPResponse;
+import org.wsd.ontologies.otp.RefuseOTPGenerationResponse;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
@@ -53,6 +55,13 @@ public class LockResponseHandler extends SimpleBehaviour {
                         Case($(), o -> run(() -> log.info("No handlers found for incoming message: {}", message)))
                 );
                 break;
+            case ACLMessage.REFUSE:
+                Match(action).of(
+                        Case($(instanceOf(RefuseOTPGenerationResponse.class)), run(() -> handleRefusedOtpCodeGeneration((RefuseOTPGenerationResponse) action))),
+                        Case($(), o -> run(() -> log.info("No handlers found for incoming message: {}", message)))
+                );
+                break;
+
 
             default:
                 log.info("No handlers found for incoming message: {}", message);
@@ -63,7 +72,12 @@ public class LockResponseHandler extends SimpleBehaviour {
 
     private void handleReceivedOtpCode(final GenerateOTPResponse generateOTPResponse) {
         log.info("Received OTP: {}", generateOTPResponse.getOtpCode());
-        agent.updateOtpCode(generateOTPResponse.getOtpCode());
+        agent.updateOtpCode(Either.right(generateOTPResponse.getOtpCode()));
+    }
+
+    private void handleRefusedOtpCodeGeneration(final RefuseOTPGenerationResponse refuseOTPGenerationResponse) {
+        log.info("OTP code generation request refused because of: {}", refuseOTPGenerationResponse.getRejectionReasons());
+        agent.updateOtpCode(Either.left(refuseOTPGenerationResponse.getRejectionReasons()));
     }
 
     @Override

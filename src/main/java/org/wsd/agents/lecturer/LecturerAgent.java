@@ -1,11 +1,11 @@
 package org.wsd.agents.lecturer;
 
+import io.vavr.control.Either;
 import jade.core.AID;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-
 import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
@@ -54,15 +54,16 @@ public class LecturerAgent extends GuiAgent {
 	private void requestOTPFromLock(@NonNull final AID lockAgent) {
 		log.info("Requesting OTP from lock: {}", lockAgent);
 
-		otpMessageFactory.buildGenerateOTPRequest(lockAgent).onSuccess(otpRequestAclMessage -> {
+		/* TODO: Picking specific reservation for OTP code request */
+		otpMessageFactory.buildGenerateOTPRequest(lockAgent, 12345).onSuccess(otpRequestAclMessage -> {
 			send(otpRequestAclMessage);
 			addBehaviour(new AwaitLockResponseBehaviour(this));
 			log.info("GenerateOTPRequest successfully sent!");
 		}).onFailure(ex -> log.info("Could not send GenerateOTPRequest: {}", ex));
 	}
 
-	public void updateOtpCode(final String newOtpCode) {
-		lecturerAgentGui.refreshOtp(newOtpCode);
+	public void updateOtpCode(final Either<String, String> otpCodeOrRefusalReasons) {
+		lecturerAgentGui.refreshOtp(otpCodeOrRefusalReasons);
 	}
 
 	private void askRandomLockForReservation(@NonNull final ReservationDataRequest data) {

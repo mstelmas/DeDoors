@@ -1,6 +1,7 @@
 package org.wsd.agents.lecturer.gui;
 
 import io.vavr.API;
+import io.vavr.control.Either;
 import jade.core.AID;
 import jade.gui.GuiEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -119,8 +120,7 @@ public class LecturerAgentGui extends JFrame {
 		final JPanel lockManagementPanel = new JPanel();
 
 		availableLockAgentsComboBox.setRenderer(availableLockAgentsComboBoxRenderer);
-		availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(
-				agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
+		availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
 		lockManagementPanel.add(availableLockAgentsComboBox);
 
 		lockManagementPanel.setBorder(lockManagementPanelBorder);
@@ -132,8 +132,14 @@ public class LecturerAgentGui extends JFrame {
 		return lockManagementPanel;
 	}
 
-	public void refreshOtp(final String otpCode) {
-		receivedOtpCodeTextField.setText(otpCode);
+	public void refreshOtp(final Either<String, String> otpCodeOrRefusalReasons) {
+		receivedOtpCodeTextField.setText("");
+		otpCodeOrRefusalReasons
+				.map(otpCode -> {
+					receivedOtpCodeTextField.setText(otpCode);
+					return otpCode;
+				})
+				.orElseRun(refusalReasons -> JOptionPane.showMessageDialog(this, "OTP generation refused because of: " + refusalReasons));
 	}
 
 	private final ListCellRenderer availableLockAgentsComboBoxRenderer = new DefaultListCellRenderer() {

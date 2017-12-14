@@ -13,7 +13,7 @@ public class OTPMessageFactory {
 
     private final Agent agent;
 
-    public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver) {
+    public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver, @NonNull final Integer reservationId) {
         final ACLMessage otpRequestMessage = new ACLMessage(ACLMessage.REQUEST);
 
         otpRequestMessage.addReceiver(receiver);
@@ -21,7 +21,7 @@ public class OTPMessageFactory {
         otpRequestMessage.setOntology(OTPOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpRequestMessage, new Action(receiver, new GenerateOTPRequest()));
+            agent.getContentManager().fillContent(otpRequestMessage, new Action(receiver, new GenerateOTPRequest().withReservationId(reservationId)));
             return otpRequestMessage;
         });
     }
@@ -35,6 +35,19 @@ public class OTPMessageFactory {
 
         return Try.of(() -> {
             agent.getContentManager().fillContent(otpResponseMessage, new Action(receiver, new GenerateOTPResponse().withOtpCode(otpCode)));
+            return otpResponseMessage;
+        });
+    }
+
+    public Try<ACLMessage> buildRefuseOTPGenerationResponse(@NonNull final AID receiver, String rejectionReason) {
+        final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.REFUSE);
+
+        otpResponseMessage.addReceiver(receiver);
+        otpResponseMessage.setLanguage(OTPOntology.codec.getName());
+        otpResponseMessage.setOntology(OTPOntology.instance.getName());
+
+        return Try.of(() -> {
+            agent.getContentManager().fillContent(otpResponseMessage, new Action(receiver, new RefuseOTPGenerationResponse().withRejectionReasons(rejectionReason)));
             return otpResponseMessage;
         });
     }

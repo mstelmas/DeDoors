@@ -5,7 +5,7 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.wsd.agents.lock.ReservationOfferService;
+import org.wsd.agents.lock.reservations.ReservationOfferService;
 import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
 import org.wsd.ontologies.reservation.ReservationOffer;
