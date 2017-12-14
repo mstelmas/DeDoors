@@ -2,6 +2,7 @@ package org.wsd.agents.keeper;
 
 import jade.core.Agent;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.keeper.behaviours.RequestCertificateHandler;
 import org.wsd.ontologies.certificate.CertificateOntology;
 
 @Slf4j
@@ -13,7 +14,7 @@ public class KeeperAgent extends Agent {
         getContentManager().registerOntology(CertificateOntology.instance);
 
         // TODO create and add behaviours
-//        addBehaviour(new RequestCertificateMessageHandler(this));
+        addBehaviour(new RequestCertificateHandler(this));
 //        addBehaviour(new RequestPermissionsMessageHandler(this));
     }
 }

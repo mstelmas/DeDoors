@@ -13,7 +13,7 @@ public class CertificateMessageFactory {
 
     private final Agent agent;
 
-    public Try<ACLMessage> buildNewCertificateRequest(@NonNull final AID receiver, String email, String passwordHash) {
+    public Try<ACLMessage> buildAskForCertificateRequest(@NonNull final AID receiver, String email, String password) {
         final ACLMessage requestMessage = new ACLMessage(ACLMessage.REQUEST);
 
         requestMessage.addReceiver(receiver);
@@ -22,13 +22,13 @@ public class CertificateMessageFactory {
 
         return Try.of(() -> {
             agent.getContentManager().fillContent(requestMessage, new Action(receiver, new AskForCertificateRequest()
-                    .withEmail(email).withPasswordHash(passwordHash)
+                    .withEmail(email).withPassword(password)
             ));
             return requestMessage;
         });
     }
 
-    public Try<ACLMessage> buildNewCertificateResponse(@NonNull final AID receiver, String certificate) {
+    public Try<ACLMessage> buildAskForCertificateResponse(@NonNull final AID receiver, String certificate) {
         final ACLMessage responseMessage = new ACLMessage(ACLMessage.INFORM_IF);
 
         responseMessage.addReceiver(receiver);
