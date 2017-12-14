@@ -4,12 +4,14 @@ import io.vavr.control.Either;
 import jade.core.AID;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
+import org.wsd.agents.lecturer.reservations.ReservationsStateService;
 import org.wsd.ontologies.otp.OTPMessageFactory;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
@@ -22,6 +24,9 @@ import javax.swing.*;
 public class LecturerAgent extends GuiAgent {
 
 	transient private LecturerAgentGui lecturerAgentGui;
+
+    @Getter
+    private final ReservationsStateService reservationsStateService = new ReservationsStateService();
 
 	private final OTPMessageFactory otpMessageFactory = new OTPMessageFactory(this);
 	private final ReservationMessageFactory reservationMessageFactory = new ReservationMessageFactory(this);

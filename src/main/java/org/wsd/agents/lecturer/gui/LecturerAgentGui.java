@@ -10,6 +10,7 @@ import org.wsd.GuiLookAndFeelManager;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.agents.lecturer.LecturerGuiEvents;
+import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 
 import javax.swing.*;
@@ -33,6 +34,8 @@ public class LecturerAgentGui extends JFrame {
 	private final JButton requestOTPButton = new JButton("Request OTP");
 	/* TODO: Runtime lock agents discovery if really needed */
 	private final JComboBox<AID> availableLockAgentsComboBox = new JComboBox<>();
+    private final JList<Reservation> agentReservationsList = new JList<>();
+    private final JScrollPane agentReservationsScrollPanel = new JScrollPane();
 
 	private final TitledBorder askReservationsPanelBorder = BorderFactory.createTitledBorder("Reservation management");
 	private final JButton askForReservationButton = new JButton("Ask for reservation");
@@ -119,18 +122,31 @@ public class LecturerAgentGui extends JFrame {
 	private JPanel buildLockManagementPanel() {
 		final JPanel lockManagementPanel = new JPanel();
 
-		availableLockAgentsComboBox.setRenderer(availableLockAgentsComboBoxRenderer);
-		availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
-		lockManagementPanel.add(availableLockAgentsComboBox);
+        agentReservationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        agentReservationsList.setCellRenderer(agentReservationsListRenderer);
+        agentReservationsScrollPanel.setViewportView(agentReservationsList);
+        lockManagementPanel.add(agentReservationsScrollPanel);
 
-		lockManagementPanel.setBorder(lockManagementPanelBorder);
-		lockManagementPanel.add(requestOTPButton);
+        refreshAvailableReservations();
 
-		receivedOtpCodeTextField.setEditable(false);
-		lockManagementPanel.add(receivedOtpCodeTextField);
+        availableLockAgentsComboBox.setRenderer(availableLockAgentsComboBoxRenderer);
+        availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
+        lockManagementPanel.add(availableLockAgentsComboBox);
+
+        lockManagementPanel.setBorder(lockManagementPanelBorder);
+        lockManagementPanel.add(requestOTPButton);
+
+        receivedOtpCodeTextField.setEditable(false);
+        lockManagementPanel.add(receivedOtpCodeTextField);
 
 		return lockManagementPanel;
 	}
+
+	public void refreshAvailableReservations() {
+        final DefaultListModel<Reservation> availableReservationsListModel = new DefaultListModel<>();
+        lecturerAgent.getReservationsStateService().findAll().forEach(availableReservationsListModel::addElement);
+        agentReservationsList.setModel(availableReservationsListModel);
+    }
 
 	public void refreshOtp(final Either<String, String> otpCodeOrRefusalReasons) {
 		receivedOtpCodeTextField.setText("");
@@ -153,4 +169,17 @@ public class LecturerAgentGui extends JFrame {
 			return this;
 		}
 	};
+
+    private final ListCellRenderer agentReservationsListRenderer = new DefaultListCellRenderer() {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+                                                      boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+            API.Match(value)
+                    .of(Case($(instanceOf(Reservation.class)), reservation -> run(() -> setText(String.format("Reservation ID: %d@%s", reservation.getId(), reservation.getLock().getLocalName())))));
+
+            return this;
+        }
+    };
 }
