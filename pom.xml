@@ -19,6 +19,8 @@
         <slf4j.version>1.7.10</slf4j.version>
         <vavr.version>0.9.2</vavr.version>
         <commons-lang3.version>3.7</commons-lang3.version>
+        <commons-configuration2.version>2.2</commons-configuration2.version>
+        <commons-beanutils.version>1.9.3</commons-beanutils.version>
     </properties>
 
     <repositories>
@@ -122,6 +124,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>${commons-configuration2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>${commons-beanutils.version}</version>
         </dependency>
     </dependencies>
 

@@ -25,6 +25,8 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
         this.messageContentExtractor = new MessageContentExtractor(agent);
     }
 
+    /* TODO: Timeout handling */
+
     @Override
     protected void handlePropose(final ACLMessage proposeMessage, final Vector acceptances) {
         messageContentExtractor.extract(proposeMessage, ReservationOffer.class)
