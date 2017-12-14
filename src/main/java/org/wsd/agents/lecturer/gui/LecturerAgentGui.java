@@ -2,9 +2,11 @@ package org.wsd.agents.lecturer.gui;
 
 import io.vavr.API;
 import io.vavr.control.Either;
+import io.vavr.control.Try;
 import jade.core.AID;
 import jade.gui.GuiEvent;
 import lombok.extern.slf4j.Slf4j;
+import net.miginfocom.swing.MigLayout;
 import org.wsd.AgentResolverService;
 import org.wsd.GuiLookAndFeelManager;
 import org.wsd.agents.AgentTypes;
@@ -31,8 +33,9 @@ public class LecturerAgentGui extends JFrame {
 
     /* Lock management GUI for USER_LECTURER */
 	private final TitledBorder lecturerLockManagementPanelBorder = BorderFactory.createTitledBorder("Lock management (USER_LECTURER)");
-	private final JTextField lecturerReceivedOtpCodeTextField = new JTextField(10);
-	private final JButton lecturerRequestOTPButton = new JButton("Request OTP");
+    private final JLabel lecturerReceiveOTPLabel = new JLabel("Lock opening code: ");
+    private final JTextField lecturerReceivedOtpCodeTextField = new JTextField(10);
+    private final JButton lecturerRequestOTPButton = new JButton("Request OTP for reservation");
 	/* TODO: Runtime lock agents discovery if really needed */
 	private final JComboBox<AID> availableLockAgentsComboBox = new JComboBox<>();
     private final JList<Reservation> agentReservationsList = new JList<>();
@@ -42,8 +45,10 @@ public class LecturerAgentGui extends JFrame {
     private final TitledBorder technicianLockManagementPanelBorder = BorderFactory.createTitledBorder("Lock management (USER_TECHNICIAN)");
     private final JTextField technicianReceivedOtpCodeTextField = new JTextField(10);
     private final JButton technicianRequestOTPButton = new JButton("Open lock");
+    private final JLabel technicianRequestOTPLabel = new JLabel("Lock opening code: ");
 
 	private final TitledBorder askReservationsPanelBorder = BorderFactory.createTitledBorder("Reservation management (USER_LECTURER)");
+    private final TitledBorder reservationRequirementsPanelBorder = BorderFactory.createTitledBorder("Reservation requirements");
 	private final JButton askForReservationButton = new JButton("Ask for reservation");
 	private final JSpinner startReservationDateTimeSpinner = new JSpinner(new SpinnerDateModel());
 	private final JSpinner endReservationDateTimeSpinner = new JSpinner(new SpinnerDateModel());
@@ -52,6 +57,15 @@ public class LecturerAgentGui extends JFrame {
 	private final JLabel numberOfParticipantsText = new JLabel("Number of participants:");
 	private final JSpinner numberOfParticipantsSpinner = new JSpinner();
 	private final JCheckBox weeklyReservationCheckBox = new JCheckBox("Reservation every week");
+	private final JCheckBox isLaboratoryCheckBox = new JCheckBox("Laboratory");
+	private final JCheckBox isSeminaryHallCheckBox = new JCheckBox("Seminary Hall");
+	private final JCheckBox multimediaProjectorCheckBox = new JCheckBox("Multimedia projector");
+	private final JCheckBox tvCheckBox = new JCheckBox("TV");
+	private final JLabel numberOfComputersLabel = new JLabel("Number of computers: ");
+    private final JTextField numberOfComputersTextField = new JTextField(5);
+    private final JLabel specificRoomNumberLabel = new JLabel("Specific room number: ");
+    private final JTextField specificRoomNumberTextField = new JTextField(5);
+    private final TitledBorder roomRequirementsPanelBorder = BorderFactory.createTitledBorder("Room requirements");
 
 	private LecturerAgent lecturerAgent;
 	private AgentResolverService agentResolverService;
@@ -102,31 +116,64 @@ public class LecturerAgentGui extends JFrame {
             lecturerAgent.postGuiEvent(requestNewOtpEvent);
         });
 
-		this.getContentPane().setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
-		this.getContentPane().add(buildReservationsPanel());
-		this.getContentPane().add(buildLockManagementPanel());
+		this.getContentPane().setLayout(new MigLayout());
+		this.getContentPane().add(buildReservationsPanel(), "dock north, wrap, push, grow");
+		this.getContentPane().add(buildLockManagementPanel(), "dock south, push, grow");
 	}
 
 	private JPanel buildReservationsPanel() {
-		final JPanel askReservationsPanel = new JPanel();
+		final JPanel askReservationsPanel = new JPanel(new MigLayout());
+        askReservationsPanel.setBorder(askReservationsPanelBorder);
 
-		askReservationsPanel.setBorder(askReservationsPanelBorder);
-		askReservationsPanel.setLayout(new BoxLayout(askReservationsPanel, BoxLayout.Y_AXIS));
-		askReservationsPanel.add(startReservationSpinnerText);
-		askReservationsPanel.add(startReservationDateTimeSpinner);
-		askReservationsPanel.add(endReservationSpinnerText);
-		askReservationsPanel.add(endReservationDateTimeSpinner);
-		askReservationsPanel.add(numberOfParticipantsText);
-		askReservationsPanel.add(numberOfParticipantsSpinner);
-		askReservationsPanel.add(weeklyReservationCheckBox);
-		askReservationsPanel.add(askForReservationButton);
+        askReservationsPanel.add(buildReservationRequirementsPanel(), "wrap, growx, pushx");
 
-		startReservationDateTimeSpinner
-				.setEditor(new JSpinner.DateEditor(startReservationDateTimeSpinner, "yyyy-MM-dd HH:mm"));
-		endReservationDateTimeSpinner
-				.setEditor(new JSpinner.DateEditor(endReservationDateTimeSpinner, "yyyy-MM-dd HH:mm"));
-		return askReservationsPanel;
+        askReservationsPanel.add(buildRoomRequirementsPanel(), "wrap, growx, pushx");
+
+        askReservationsPanel.add(askForReservationButton, "right");
+
+        return askReservationsPanel;
 	}
+
+	private JPanel buildReservationRequirementsPanel() {
+        final JPanel reservationRequirementsPanel = new JPanel(new MigLayout());
+
+        reservationRequirementsPanel.setBorder(reservationRequirementsPanelBorder);
+        reservationRequirementsPanel.add(startReservationSpinnerText);
+        reservationRequirementsPanel.add(startReservationDateTimeSpinner);
+        reservationRequirementsPanel.add(endReservationSpinnerText);
+        reservationRequirementsPanel.add(endReservationDateTimeSpinner, "wrap");
+        reservationRequirementsPanel.add(numberOfParticipantsText);
+        reservationRequirementsPanel.add(numberOfParticipantsSpinner);
+        reservationRequirementsPanel.add(weeklyReservationCheckBox);
+
+        startReservationDateTimeSpinner
+                .setEditor(new JSpinner.DateEditor(startReservationDateTimeSpinner, "yyyy-MM-dd HH:mm"));
+        endReservationDateTimeSpinner
+                .setEditor(new JSpinner.DateEditor(endReservationDateTimeSpinner, "yyyy-MM-dd HH:mm"));
+
+
+        return reservationRequirementsPanel;
+    }
+
+	private JPanel buildRoomRequirementsPanel() {
+        final JPanel roomRequirementsPanel = new JPanel(new MigLayout());
+
+        roomRequirementsPanel.setBorder(roomRequirementsPanelBorder);
+        roomRequirementsPanel.add(isLaboratoryCheckBox);
+        roomRequirementsPanel.add(isSeminaryHallCheckBox);
+        roomRequirementsPanel.add(multimediaProjectorCheckBox);
+        roomRequirementsPanel.add(tvCheckBox, "wrap");
+
+        numberOfComputersLabel.setLabelFor(numberOfComputersTextField);
+        roomRequirementsPanel.add(numberOfComputersLabel);
+        roomRequirementsPanel.add(numberOfComputersTextField);
+
+        specificRoomNumberLabel.setLabelFor(specificRoomNumberTextField);
+        roomRequirementsPanel.add(specificRoomNumberLabel);
+        roomRequirementsPanel.add(specificRoomNumberTextField);
+
+        return roomRequirementsPanel;
+    }
 
 	// TODO: read all reservation data
 	private ReservationDataRequest readReservationData() {
@@ -135,50 +182,59 @@ public class LecturerAgentGui extends JFrame {
 		data.setDateTo((Date) endReservationDateTimeSpinner.getValue());
 		data.setNumberOfParticipants((Integer) numberOfParticipantsSpinner.getValue());
 		data.setIsWeekly(weeklyReservationCheckBox.isSelected());
+		data.setIsLaboratory(isLaboratoryCheckBox.isSelected());
+		data.setIsSeminaryHall(isSeminaryHallCheckBox.isSelected());
+		data.setIsMultimediaProjectorRequired(multimediaProjectorCheckBox.isSelected());
+		data.setIsTVRequired(tvCheckBox.isSelected());
+        Try.of(() -> Integer.valueOf(specificRoomNumberTextField.getText())).onSuccess(data::setSpecificRoomNumber);
+        Try.of(() -> Integer.valueOf(numberOfComputersTextField.getText())).onSuccess(data::setNumberOfComputers);
 		return data;
 	}
 
 	private JPanel buildLockManagementPanel() {
-		final JPanel mainLockManagementPanel = new JPanel();
-		mainLockManagementPanel.setLayout(new BoxLayout(mainLockManagementPanel, BoxLayout.Y_AXIS));
+		final JPanel mainLockManagementPanel = new JPanel(new MigLayout());
 
-        mainLockManagementPanel.add(buildLecturerLockManagementPanel());
-        mainLockManagementPanel.add(buildTechnicianLockManagementPanel());
+        mainLockManagementPanel.add(buildLecturerLockManagementPanel(), "pushx, growx");
+        mainLockManagementPanel.add(buildTechnicianLockManagementPanel(), "pushx, growx");
 
 		return mainLockManagementPanel;
 	}
 
 	private JPanel buildLecturerLockManagementPanel() {
-        final JPanel lecturerLockManagementPanel = new JPanel();
+        final JPanel lecturerLockManagementPanel = new JPanel(new MigLayout());
 
         agentReservationsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         agentReservationsList.setCellRenderer(agentReservationsListRenderer);
         agentReservationsScrollPanel.setViewportView(agentReservationsList);
-        lecturerLockManagementPanel.add(agentReservationsScrollPanel);
+        lecturerLockManagementPanel.add(agentReservationsScrollPanel, "span2, wrap, growx, pushx");
 
         refreshAvailableReservations();
 
         lecturerLockManagementPanel.setBorder(lecturerLockManagementPanelBorder);
-        lecturerLockManagementPanel.add(lecturerRequestOTPButton);
+        lecturerLockManagementPanel.add(lecturerRequestOTPButton, "wrap, pushx, growx");
 
+        lecturerReceiveOTPLabel.setLabelFor(lecturerReceivedOtpCodeTextField);
+        lecturerLockManagementPanel.add(lecturerReceiveOTPLabel, "left, sg 1, split");
         lecturerReceivedOtpCodeTextField.setEditable(false);
-        lecturerLockManagementPanel.add(lecturerReceivedOtpCodeTextField);
+        lecturerLockManagementPanel.add(lecturerReceivedOtpCodeTextField, "wrap, pushx, growx");
 
         return lecturerLockManagementPanel;
     }
 
     private JPanel buildTechnicianLockManagementPanel() {
-        final JPanel technicianLockManagementPanel = new JPanel();
+        final JPanel technicianLockManagementPanel = new JPanel(new MigLayout());
 
         availableLockAgentsComboBox.setRenderer(availableLockAgentsComboBoxRenderer);
         availableLockAgentsComboBox.setModel(new DefaultComboBoxModel(agentResolverService.agentsOfType(AgentTypes.LOCK).toArray()));
         technicianLockManagementPanel.add(availableLockAgentsComboBox);
 
         technicianLockManagementPanel.setBorder(technicianLockManagementPanelBorder);
-        technicianLockManagementPanel.add(technicianRequestOTPButton);
+        technicianLockManagementPanel.add(technicianRequestOTPButton, "wrap, pushx, growx");
 
+        technicianRequestOTPLabel.setLabelFor(technicianReceivedOtpCodeTextField);
+        technicianLockManagementPanel.add(technicianRequestOTPLabel);
         technicianReceivedOtpCodeTextField.setEditable(false);
-        technicianLockManagementPanel.add(technicianReceivedOtpCodeTextField);
+        technicianLockManagementPanel.add(technicianReceivedOtpCodeTextField, "pushx, growx");
 
         return technicianLockManagementPanel;
     }

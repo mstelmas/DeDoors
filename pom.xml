@@ -23,6 +23,7 @@
         <commons-beanutils.version>1.9.3</commons-beanutils.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <guava.version>23.0</guava.version>
+        <miglayout.version>3.7.4</miglayout.version>
     </properties>
 
     <repositories>
@@ -142,6 +143,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout</artifactId>
+            <version>${miglayout.version}</version>
         </dependency>
     </dependencies>
 
