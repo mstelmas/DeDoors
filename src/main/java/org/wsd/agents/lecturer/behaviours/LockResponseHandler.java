@@ -11,6 +11,7 @@ import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.agents.lecturer.UserAgentRoles;
+import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.ontologies.otp.GenerateOTPResponse;
 import org.wsd.ontologies.otp.RefuseOTPGenerationResponse;
 import org.wsd.ontologies.reservation.CancelReservationResponse;
@@ -80,7 +81,8 @@ public class LockResponseHandler extends SimpleBehaviour {
 
     private void handleCanceledReservation(final AID lock, final CancelReservationResponse cancelReservationResponse) {
         log.info("Reservation {} on {} successfully canceled!", cancelReservationResponse.getReservationId(), lock.getLocalName());
-        /* TODO: remove cancelled reservation from ReservationStateService */
+        agent.getReservationsStateService().remove(new Reservation(cancelReservationResponse.getReservationId(), lock));
+        agent.updateReservations();
     }
 
     private void handleCanceledReservation(final AID lock, final RefuseReservationCancelationResponse refuseReservationCancelationResponse) {

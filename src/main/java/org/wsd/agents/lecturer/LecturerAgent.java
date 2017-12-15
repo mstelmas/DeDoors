@@ -104,4 +104,8 @@ public class LecturerAgent extends GuiAgent {
 			log.info("CancelReservation successfully sent!");
 		}).onFailure(ex -> log.info("Could not send CancelReservation: {}", ex));
 	}
+
+	public void updateReservations() {
+		lecturerAgentGui.refreshAvailableReservations();
+	}
 }
