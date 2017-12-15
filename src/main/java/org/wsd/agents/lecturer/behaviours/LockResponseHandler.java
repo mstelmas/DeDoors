@@ -5,6 +5,7 @@ import io.vavr.control.Try;
 import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.onto.basic.Action;
+import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.agents.lecturer.UserAgentRoles;
 import org.wsd.ontologies.otp.GenerateOTPResponse;
 import org.wsd.ontologies.otp.RefuseOTPGenerationResponse;
+import org.wsd.ontologies.reservation.CancelReservationResponse;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
@@ -52,15 +54,16 @@ public class LockResponseHandler extends SimpleBehaviour {
         final Concept action = ((Action) contentElement).getAction();
 
         switch (message.getPerformative()) {
-            case ACLMessage.INFORM_IF:
+            case ACLMessage.INFORM:
                 Match(action).of(
-                        Case($(instanceOf(GenerateOTPResponse.class)), run(() -> handleReceivedOtpCode((GenerateOTPResponse)action))),
+                        Case($(instanceOf(GenerateOTPResponse.class)), o -> run(() -> handleReceivedOtpCode((GenerateOTPResponse)action))),
+                        Case($(instanceOf(CancelReservationResponse.class)), o -> run(() -> handleCanceledReservation(message.getSender(), (CancelReservationResponse)action))),
                         Case($(), o -> run(() -> log.info("No handlers found for incoming message: {}", message)))
                 );
                 break;
             case ACLMessage.REFUSE:
                 Match(action).of(
-                        Case($(instanceOf(RefuseOTPGenerationResponse.class)), run(() -> handleRefusedOtpCodeGeneration((RefuseOTPGenerationResponse) action))),
+                        Case($(instanceOf(RefuseOTPGenerationResponse.class)), o -> run(() -> handleRefusedOtpCodeGeneration((RefuseOTPGenerationResponse) action))),
                         Case($(), o -> run(() -> log.info("No handlers found for incoming message: {}", message)))
                 );
                 break;
@@ -71,6 +74,11 @@ public class LockResponseHandler extends SimpleBehaviour {
         }
 
         isFinished = true;
+    }
+
+    private void handleCanceledReservation(final AID lock, final CancelReservationResponse cancelReservationResponse) {
+        log.info("Reservation {} on {} successfully canceled!", cancelReservationResponse.getReservationId(), lock.getLocalName());
+        /* TODO: remove cancelled reservation from ReservationStateService */
     }
 
     private void handleReceivedOtpCode(final GenerateOTPResponse generateOTPResponse) {

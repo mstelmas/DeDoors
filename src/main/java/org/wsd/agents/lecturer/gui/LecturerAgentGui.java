@@ -36,6 +36,7 @@ public class LecturerAgentGui extends JFrame {
     private final JLabel lecturerReceiveOTPLabel = new JLabel("Lock opening code: ");
     private final JTextField lecturerReceivedOtpCodeTextField = new JTextField(10);
     private final JButton lecturerRequestOTPButton = new JButton("Request OTP for reservation");
+    private final JButton cancelReservationButton = new JButton("Cancel reservation");
 	/* TODO: Runtime lock agents discovery if really needed */
 	private final JComboBox<AID> availableLockAgentsComboBox = new JComboBox<>();
     private final JList<Reservation> agentReservationsList = new JList<>();
@@ -102,6 +103,17 @@ public class LecturerAgentGui extends JFrame {
 			requestNewOtpEvent.addParameter(agentReservationsList.getSelectedValue());
 			lecturerAgent.postGuiEvent(requestNewOtpEvent);
 		});
+
+        cancelReservationButton.addActionListener(actionEvent -> {
+            if (agentReservationsList.getSelectedValue() == null) {
+                JOptionPane.showMessageDialog(this, "No reservation selected from list");
+                return;
+            }
+
+            final GuiEvent cancelReservationEvent = new GuiEvent(this, LecturerGuiEvents.CANCEL_RESERVATION);
+            cancelReservationEvent.addParameter(agentReservationsList.getSelectedValue());
+            lecturerAgent.postGuiEvent(cancelReservationEvent);
+        });
 
 		askForReservationButton.addActionListener(actionEvent -> {
 			final GuiEvent askForReservationEvent = new GuiEvent(this, LecturerGuiEvents.ASK_FOR_RESERVATION);
@@ -211,6 +223,7 @@ public class LecturerAgentGui extends JFrame {
         refreshAvailableReservations();
 
         lecturerLockManagementPanel.setBorder(lecturerLockManagementPanelBorder);
+        lecturerLockManagementPanel.add(cancelReservationButton, "wrap, pushx, growx");
         lecturerLockManagementPanel.add(lecturerRequestOTPButton, "wrap, pushx, growx");
 
         lecturerReceiveOTPLabel.setLabelFor(lecturerReceivedOtpCodeTextField);

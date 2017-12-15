@@ -40,6 +40,14 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 
 			final ConceptSchema reservationOfferConceptSchema = (ConceptSchema) getSchema(RESERVATION_OFFER);
 			reservationOfferConceptSchema.add(RESERVATION_OFFER_SCORE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+
+			add(new AgentActionSchema(CANCEL_RESERVATION), CancelReservationRequest.class);
+			final AgentActionSchema cancelReservationActionSchema = (AgentActionSchema) getSchema(CANCEL_RESERVATION);
+			cancelReservationActionSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+
+			add(new ConceptSchema(CANCELED_RESERVATION), CancelReservationResponse.class);
+			final ConceptSchema canceledReservationConceptSchema = (ConceptSchema) getSchema(CANCELED_RESERVATION);
+			canceledReservationConceptSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
 		}).onFailure(ex -> log.error("Could not create Reservation ontology schema {}", ex));
 	}
 

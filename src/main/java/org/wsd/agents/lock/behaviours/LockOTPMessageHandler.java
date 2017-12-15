@@ -1,15 +1,5 @@
 package org.wsd.agents.lock.behaviours;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
-import static io.vavr.API.Match;
-import static io.vavr.API.run;
-import static io.vavr.Predicates.instanceOf;
-
-import org.wsd.agents.lock.LockAgent;
-import org.wsd.ontologies.otp.GenerateOTPRequest;
-import org.wsd.ontologies.otp.OTPOntology;
-
 import io.vavr.control.Try;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -18,6 +8,12 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.lock.LockAgent;
+import org.wsd.ontologies.otp.GenerateOTPRequest;
+import org.wsd.ontologies.otp.OTPOntology;
+
+import static io.vavr.API.*;
+import static io.vavr.Predicates.instanceOf;
 
 @Slf4j
 public class LockOTPMessageHandler extends CyclicBehaviour {
@@ -57,7 +53,7 @@ public class LockOTPMessageHandler extends CyclicBehaviour {
         switch (message.getPerformative()) {
             case ACLMessage.REQUEST:
                 Match(action).of(
-                        Case($(instanceOf(GenerateOTPRequest.class)), run(() -> agent.addBehaviour(new GenerateOTPBehaviour(agent, message)))),
+                        Case($(instanceOf(GenerateOTPRequest.class)), o -> run(() -> agent.addBehaviour(new GenerateOTPBehaviour(agent, message)))),
                         Case($(), o -> run(() -> replyNotUnderstood(message)))
                 );
                 break;

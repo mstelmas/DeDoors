@@ -27,7 +27,7 @@ public class OTPMessageFactory {
     }
 
     public Try<ACLMessage> buildGenerateOTPResponse(@NonNull final AID receiver, String otpCode, Integer reservationId) {
-        final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.INFORM_IF);
+        final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.INFORM);
 
         otpResponseMessage.addReceiver(receiver);
         otpResponseMessage.setLanguage(OTPOntology.codec.getName());

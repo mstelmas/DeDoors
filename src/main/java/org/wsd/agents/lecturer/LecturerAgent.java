@@ -62,6 +62,8 @@ public class LecturerAgent extends GuiAgent {
 			ReservationDataRequest data = (ReservationDataRequest) guiEvent.getAllParameter().next();
 			askRandomLockForReservation(data);
 			log.info("Reservatuon data: {}", data);
+		} else if (commandType == LecturerGuiEvents.CANCEL_RESERVATION) {
+			cancelReservation((Reservation) guiEvent.getAllParameter().next());
 		}
 	}
 
@@ -69,7 +71,6 @@ public class LecturerAgent extends GuiAgent {
 	private void requestOTPFromLock(@NonNull final Reservation reservation, final UserAgentRoles userAgentRole) {
 		log.info("Requesting OTP for reservation: {}", reservation);
 
-		/* TODO: Picking specific reservation for OTP code request */
 		otpMessageFactory.buildGenerateOTPRequest(reservation.getLock(), reservation.getId()).onSuccess(otpRequestAclMessage -> {
 			send(otpRequestAclMessage);
 			addBehaviour(new AwaitLockResponseBehaviour(this, userAgentRole));
@@ -94,5 +95,13 @@ public class LecturerAgent extends GuiAgent {
 			send(reservationAclMessage);
 			log.info("Message succesfully sent!");
 		}).onFailure(ex -> log.info("Could not send ReservationRequest: {}", ex));
+	}
+
+	private void cancelReservation(@NonNull final Reservation reservation) {
+		reservationMessageFactory.buildCancelReservationRequest(reservation).onSuccess(cancelReservationAclMessage -> {
+			send(cancelReservationAclMessage);
+			addBehaviour(new AwaitLockResponseBehaviour(this, UserAgentRoles.USER_LECTURER));
+			log.info("CancelReservation successfully sent!");
+		}).onFailure(ex -> log.info("Could not send CancelReservation: {}", ex));
 	}
 }

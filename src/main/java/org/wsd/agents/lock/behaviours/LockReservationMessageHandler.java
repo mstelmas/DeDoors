@@ -10,6 +10,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lock.LockAgent;
+import org.wsd.ontologies.reservation.CancelReservationRequest;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 import org.wsd.ontologies.reservation.ReservationOntology;
 
@@ -57,8 +58,10 @@ public class LockReservationMessageHandler extends CyclicBehaviour {
 		switch (message.getPerformative()) {
 		case ACLMessage.REQUEST:
 			Match(action).of(
-					Case($(instanceOf(ReservationDataRequest.class)), run(
+					Case($(instanceOf(ReservationDataRequest.class)), o -> run(
 							() -> agent.addBehaviour(new PerformReservationCNPBehaviour(agent, (ReservationDataRequest) action)))),
+					Case($(instanceOf(CancelReservationRequest.class)), o-> run(
+							() -> agent.addBehaviour(new CancelReservationBehaviour(agent, message, (CancelReservationRequest) action)))),
 					Case($(), o -> run(() -> replyNotUnderstood(message))));
 			break;
 

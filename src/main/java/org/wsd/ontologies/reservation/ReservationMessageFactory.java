@@ -9,6 +9,7 @@ import jade.lang.acl.ACLMessage;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.lecturer.reservations.Reservation;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -77,4 +78,41 @@ public class ReservationMessageFactory {
 
         return Try.success(rejectOfferMessage);
     }
+
+	public Try<ACLMessage> buildCancelReservationRequest(@NonNull final Reservation reservation) {
+		final ACLMessage cancelReservationMessage = new ACLMessage(ACLMessage.REQUEST);
+
+		cancelReservationMessage.addReceiver(reservation.getLock());
+		cancelReservationMessage.setLanguage(ReservationOntology.codec.getName());
+		cancelReservationMessage.setOntology(ReservationOntology.instance.getName());
+		return Try.of(() -> {
+			agent.getContentManager().fillContent(cancelReservationMessage, new Action(reservation.getLock(), new CancelReservationRequest().withReservationId(reservation.getId())));
+			return cancelReservationMessage;
+		});
+	}
+
+	public Try<ACLMessage> buildCancelReservationInformResponse(@NonNull final AID receiver, @NonNull final Integer reservationId) {
+		final ACLMessage informReservationCancelled = new ACLMessage(ACLMessage.INFORM);
+
+		informReservationCancelled.addReceiver(receiver);
+		informReservationCancelled.setLanguage(ReservationOntology.codec.getName());
+		informReservationCancelled.setOntology(ReservationOntology.instance.getName());
+
+		return Try.of(() -> {
+			agent.getContentManager().fillContent(informReservationCancelled, new Action(receiver, new CancelReservationResponse().withReservationId(reservationId)));
+			return informReservationCancelled;
+		});
+	}
+
+	public Try<ACLMessage> buildCancelReservationRefuseRequest(@NonNull final Reservation reservation) {
+		final ACLMessage cancelReservationMessage = new ACLMessage(ACLMessage.REFUSE);
+
+		cancelReservationMessage.addReceiver(reservation.getLock());
+		cancelReservationMessage.setLanguage(ReservationOntology.codec.getName());
+		cancelReservationMessage.setOntology(ReservationOntology.instance.getName());
+		return Try.of(() -> {
+			agent.getContentManager().fillContent(cancelReservationMessage, new Action(reservation.getLock(), new CancelReservationRequest().withReservationId(reservation.getId())));
+			return cancelReservationMessage;
+		});
+	}
 }
