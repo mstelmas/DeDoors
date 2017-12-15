@@ -12,4 +12,5 @@ import lombok.experimental.Wither;
 @Data
 public class GenerateOTPResponse implements Concept {
     private String otpCode;
+    private Integer reservationId;
 }

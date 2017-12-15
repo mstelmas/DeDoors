@@ -57,7 +57,7 @@ public class LecturerAgent extends GuiAgent {
 		             the permissions are done this should not be necessary because
 		             user role will be checked by a lock
 		     */
-            requestOTPFromLock(new Reservation(1234, (AID)guiEvent.getAllParameter().next()), UserAgentRoles.USER_TECHNICIAN);
+            requestOTPFromLock(new Reservation(null, (AID)guiEvent.getAllParameter().next()), UserAgentRoles.USER_TECHNICIAN);
         } else if (commandType == LecturerGuiEvents.ASK_FOR_RESERVATION) {
 			ReservationDataRequest data = (ReservationDataRequest) guiEvent.getAllParameter().next();
 			askRandomLockForReservation(data);

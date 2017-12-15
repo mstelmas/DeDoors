@@ -37,27 +37,29 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
 
     @Override
     public void action() {
-        final Optional<GenerateOTPRequest> generateOTPRequest = messageContentExtractor.extract(otpRequestMessage, GenerateOTPRequest.class);
+        final Optional<GenerateOTPRequest> maybeGenerateOTPRequest = messageContentExtractor.extract(otpRequestMessage, GenerateOTPRequest.class);
 
-        if (!generateOTPRequest.isPresent()) {
+        if (!maybeGenerateOTPRequest.isPresent()) {
             log.info("Could not extract GenerateOTPRequest content");
             return;
         }
 
-        final Validation<Seq<String>, String> otpValidationResult = lockValidationService.validateGenerateOTPRequest(otpRequestMessage, generateOTPRequest.get());
+        final GenerateOTPRequest generateOTPRequest = maybeGenerateOTPRequest.get();
+
+        final Validation<Seq<String>, String> otpValidationResult = lockValidationService.validateGenerateOTPRequest(otpRequestMessage, generateOTPRequest);
 
         Match(otpValidationResult).of(
-                Case($Valid($()), o -> run(this::acceptOTPGenerationRequest)),
+                Case($Valid($()), o -> run(() -> acceptOTPGenerationRequest(generateOTPRequest))),
                 Case($Invalid($()), validationErrors -> run(() -> refuseOTPGenerationRequest(validationErrors)))
         );
     }
 
-    private void acceptOTPGenerationRequest() {
+    private void acceptOTPGenerationRequest(final GenerateOTPRequest generateOTPRequest) {
         final String otpCode = agent.getOtpStateService().generate();
 
         log.info("Generated OTP code for request: {} is: {}", otpRequestMessage, otpCode);
 
-        otpMessageFactory.buildGenerateOTPResponse(otpRequestMessage.getSender(), otpCode)
+        otpMessageFactory.buildGenerateOTPResponse(otpRequestMessage.getSender(), otpCode, generateOTPRequest.getReservationId())
                 .onSuccess(otpResponseAclMessage -> {
                     agent.send(otpResponseAclMessage);
                     log.info("GenerateOTPResponse successfully sent!");

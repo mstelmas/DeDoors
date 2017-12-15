@@ -13,7 +13,7 @@ public class OTPMessageFactory {
 
     private final Agent agent;
 
-    public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver, @NonNull final Integer reservationId) {
+    public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver, final Integer reservationId) {
         final ACLMessage otpRequestMessage = new ACLMessage(ACLMessage.REQUEST);
 
         otpRequestMessage.addReceiver(receiver);
@@ -26,7 +26,7 @@ public class OTPMessageFactory {
         });
     }
 
-    public Try<ACLMessage> buildGenerateOTPResponse(@NonNull final AID receiver, String otpCode) {
+    public Try<ACLMessage> buildGenerateOTPResponse(@NonNull final AID receiver, String otpCode, Integer reservationId) {
         final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.INFORM_IF);
 
         otpResponseMessage.addReceiver(receiver);
@@ -34,7 +34,7 @@ public class OTPMessageFactory {
         otpResponseMessage.setOntology(OTPOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpResponseMessage, new Action(receiver, new GenerateOTPResponse().withOtpCode(otpCode)));
+            agent.getContentManager().fillContent(otpResponseMessage, new Action(receiver, new GenerateOTPResponse().withOtpCode(otpCode).withReservationId(reservationId)));
             return otpResponseMessage;
         });
     }
