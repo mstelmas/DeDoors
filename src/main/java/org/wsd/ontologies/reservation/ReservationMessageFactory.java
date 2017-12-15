@@ -16,6 +16,8 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
+import javax.security.auth.callback.ConfirmationCallback;
+
 @Slf4j
 @RequiredArgsConstructor
 public class ReservationMessageFactory {
@@ -50,13 +52,13 @@ public class ReservationMessageFactory {
 		});
 	}
 
-	public Try<ACLMessage> buildReservationOfferReply(@NonNull final ACLMessage cfpMessage, final int reservationOfferScore) {
+	public Try<ACLMessage> buildReservationOfferReply(@NonNull final ACLMessage cfpMessage, final ReservationOffer reservationOffer) {
 		final ACLMessage reservationOfferMessage = cfpMessage.createReply();
 		reservationOfferMessage.setPerformative(ACLMessage.PROPOSE);
 		reservationOfferMessage.setLanguage(ReservationOntology.codec.getName());
 		reservationOfferMessage.setOntology(ReservationOntology.instance.getName());
 		return Try.of(() -> {
-			agent.getContentManager().fillContent(reservationOfferMessage, new Action(cfpMessage.getSender(), new ReservationOffer(reservationOfferScore)));
+			agent.getContentManager().fillContent(reservationOfferMessage, new Action(cfpMessage.getSender(), reservationOffer));
 			return reservationOfferMessage;
 		});
 	}
@@ -113,6 +115,43 @@ public class ReservationMessageFactory {
 		return Try.of(() -> {
 			agent.getContentManager().fillContent(refuseReservationCancelation, new Action(receiver, new RefuseReservationCancelationResponse().withReservationId(reservationId)));
 			return refuseReservationCancelation;
+		});
+	}
+
+	public Try<ACLMessage> buildOfferReservationInform(final AID receiver, @NonNull final ReservationOffer offer) {
+		final ACLMessage offerReservationInform = new ACLMessage(ACLMessage.INFORM);
+
+		offerReservationInform.addReceiver(receiver);
+		offerReservationInform.setLanguage(ReservationOntology.codec.getName());
+		offerReservationInform.setOntology(ReservationOntology.instance.getName());
+		return Try.of(() -> {
+			agent.getContentManager().fillContent(offerReservationInform, new Action(receiver, offer));
+			return offerReservationInform;
+		});
+	}
+
+	public Try<ACLMessage> buildConfirmReservationRequest(@NonNull final Reservation reservation) {
+		final ACLMessage confirmReservationMessage = new ACLMessage(ACLMessage.CONFIRM);
+
+		confirmReservationMessage.addReceiver(reservation.getLock());
+		confirmReservationMessage.setLanguage(ReservationOntology.codec.getName());
+		confirmReservationMessage.setOntology(ReservationOntology.instance.getName());
+		return Try.of(() -> {
+			agent.getContentManager().fillContent(confirmReservationMessage, new Action(reservation.getLock(), new ConfirmReservationRequest(reservation.getId())));
+			return confirmReservationMessage;
+		});
+	}
+
+	public Try<ACLMessage> buildConfirmReservationInformResponse(@NonNull final AID receiver, @NonNull final Integer reservationId) {
+		final ACLMessage informReservationConfirmed = new ACLMessage(ACLMessage.INFORM);
+
+		informReservationConfirmed.addReceiver(receiver);
+		informReservationConfirmed.setLanguage(ReservationOntology.codec.getName());
+		informReservationConfirmed.setOntology(ReservationOntology.instance.getName());
+
+		return Try.of(() -> {
+			agent.getContentManager().fillContent(informReservationConfirmed, new Action(receiver, new ConfirmReservationResponse().withReservationId(reservationId)));
+			return informReservationConfirmed;
 		});
 	}
 }

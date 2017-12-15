@@ -40,7 +40,9 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 
 			final ConceptSchema reservationOfferConceptSchema = (ConceptSchema) getSchema(RESERVATION_OFFER);
 			reservationOfferConceptSchema.add(RESERVATION_OFFER_SCORE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
-
+			reservationOfferConceptSchema.add(NUMBER_OF_COMPUTERS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+			reservationOfferConceptSchema.add(NUMBER_OF_SEATS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+			reservationOfferConceptSchema.add(LOCK_AID, (ConceptSchema) getSchema(BasicOntology.AID), ObjectSchema.MANDATORY);
 			add(new AgentActionSchema(CANCEL_RESERVATION), CancelReservationRequest.class);
 			final AgentActionSchema cancelReservationActionSchema = (AgentActionSchema) getSchema(CANCEL_RESERVATION);
 			cancelReservationActionSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
@@ -52,6 +54,15 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 			add(new ConceptSchema(REFUSE_RESERVATION_CANCELATION), RefuseReservationCancelationResponse.class);
 			final ConceptSchema refusedReservationCancelationSchema = (ConceptSchema) getSchema(REFUSE_RESERVATION_CANCELATION);
 			refusedReservationCancelationSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+
+			add(new ConceptSchema(CONFIRM_RESERVATION_RESPONSE), ConfirmReservationResponse.class);
+			final ConceptSchema confirmReservationConceptSchema = (ConceptSchema) getSchema(CONFIRM_RESERVATION_RESPONSE);
+			confirmReservationConceptSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+
+			add(new AgentActionSchema(CONFIRM_RESERVATION_REQUEST), ConfirmReservationRequest.class);
+			final AgentActionSchema confirmReservationAfentActionSchema = (AgentActionSchema) getSchema(CONFIRM_RESERVATION_REQUEST);
+			confirmReservationAfentActionSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+
 		}).onFailure(ex -> log.error("Could not create Reservation ontology schema {}", ex));
 	}
 

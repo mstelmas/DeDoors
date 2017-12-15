@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
+import org.wsd.agents.lecturer.behaviours.ReservationResponseHandler;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.agents.lecturer.reservations.ReservationsStateService;
@@ -17,6 +18,7 @@ import org.wsd.ontologies.otp.OTPMessageFactory;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
+import org.wsd.ontologies.reservation.ReservationOffer;
 import org.wsd.ontologies.reservation.ReservationOntology;
 
 import javax.swing.*;
@@ -39,7 +41,10 @@ public class LecturerAgent extends GuiAgent {
 		getContentManager().registerLanguage(ReservationOntology.codec);
 		getContentManager().registerOntology(ReservationOntology.instance);
 
+		addBehaviour(new ReservationResponseHandler(this));
+
 		SwingUtilities.invokeLater(() -> lecturerAgentGui = new LecturerAgentGui(this));
+
 	}
 
 	@Override
@@ -103,6 +108,22 @@ public class LecturerAgent extends GuiAgent {
 			addBehaviour(new AwaitLockResponseBehaviour(this, UserAgentRoles.USER_LECTURER));
 			log.info("CancelReservation successfully sent!");
 		}).onFailure(ex -> log.info("Could not send CancelReservation: {}", ex));
+	}
+
+	public void confirmReservation(@NonNull final Reservation reservation) {
+		reservationMessageFactory.buildConfirmReservationRequest(reservation).onSuccess(confirmReservationAclMessage -> {
+			send(confirmReservationAclMessage);
+			// addBehaviour(new AwaitLockResponseBehaviour(this, UserAgentRoles.USER_LECTURER));
+			log.info("Successfully send confirm reservation message!");
+		}).onFailure(ex -> log.info("Could not send confirm reservation message: {}", ex));
+	}
+
+	public void addReservationOffer(@NonNull final Reservation offer) {
+		//TODO: Add reservation offer to agent
+		log.info("Adding reservation offer to {}", getAID());
+
+		log.info("Sending confirm reservation message automaticly");
+		confirmReservation(offer);
 	}
 
 	public void updateReservations() {

@@ -1,15 +1,17 @@
 package org.wsd.agents.lock.behaviours;
 
-import jade.core.Agent;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import jade.proto.ContractNetResponder;
-import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.lock.LockAgent;
 import org.wsd.agents.lock.configuration.LockConfigurationProvider;
 import org.wsd.agents.lock.reservations.ReservationOfferService;
 import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
+import org.wsd.ontologies.reservation.ReservationOffer;
+
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.proto.ContractNetResponder;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ReservationCNPLockBehaviour extends ContractNetResponder {
@@ -19,9 +21,11 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
     private final LockConfigurationProvider lockConfigurationProvider;
     private final ReservationMessageFactory reservationMessageFactory;
     private final MessageContentExtractor messageContentExtractor;
+    private final LockAgent agent;
 
-    public ReservationCNPLockBehaviour(final Agent agent, final MessageTemplate messageTemplate) {
+    public ReservationCNPLockBehaviour(final LockAgent agent, final MessageTemplate messageTemplate) {
         super(agent, messageTemplate);
+        this.agent = agent;
         this.lockConfigurationProvider = new LockConfigurationProvider(agent);
         this.reservationMessageFactory = new ReservationMessageFactory(agent);
         this.messageContentExtractor = new MessageContentExtractor(agent);
@@ -40,11 +44,20 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
                     messageContentExtractor.extract(cfp, ReservationDataRequest.class)
                             .map(reservationDataRequest ->
                                     reservationMessageFactory
-                                            .buildReservationOfferReply(cfp, reservationOfferService.scoreOffer(reservationDataRequest, lockConfiguration))
+                                            .buildReservationOfferReply(cfp,
+                                                new ReservationOffer(reservationOfferService.scoreOffer(reservationDataRequest, lockConfiguration),
+                                                                     lockConfiguration, agent.getAID(), agent.getNextId()))
                                             .getOrElse(() -> null)
                             )
                             .orElseGet(() -> null)
                 )
                 .orElseGet(() -> null);
+    }
+
+    @Override
+    protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
+        log.info("HANDLE ACCEPT PROPOSAL");
+
+        return null;
     }
 }

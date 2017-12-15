@@ -29,6 +29,8 @@ public class LockAgent extends GuiAgent {
     @Getter
     private final OtpStateService otpStateService = new OtpStateService();
 
+    private int nextReservationId = 0;
+
     private final MessageTemplate RESERVATION_CNP_MESSAGE_TEMPLATE = MessageTemplate.and(
             MessageTemplate.and(
                     MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
@@ -75,5 +77,10 @@ public class LockAgent extends GuiAgent {
 
             lockAgentGui.updateLockState();
         }
+    }
+
+    public int getNextId() {
+        nextReservationId++;
+        return nextReservationId;
     }
 }

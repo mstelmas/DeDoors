@@ -19,14 +19,16 @@ public class PerformReservationCNPBehaviour extends OneShotBehaviour {
 	private final LockAgent agent;
 	private final ReservationMessageFactory reservationMessageFactory;
 	private final ReservationDataRequest reservationRequestData;
-	private final AgentResolverService agentResolverService;
+    private final AgentResolverService agentResolverService;
+    private AID customerAID;
 
-	public PerformReservationCNPBehaviour(final LockAgent agent, final ReservationDataRequest reservationRequest) {
+	public PerformReservationCNPBehaviour(final LockAgent agent, AID customerAID, final ReservationDataRequest reservationRequest) {
 		super(agent);
 		this.agent = agent;
 		this.reservationMessageFactory = new ReservationMessageFactory(agent);
 		this.reservationRequestData = reservationRequest;
-		this.agentResolverService = new AgentResolverService(agent);
+        this.agentResolverService = new AgentResolverService(agent);
+        this.customerAID = customerAID;
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class PerformReservationCNPBehaviour extends OneShotBehaviour {
 
         reservationMessageFactory.buildCallForProposalRequest(candidateLockAgents, reservationRequestData)
                 .onSuccess(cfpMessage -> {
-                    agent.addBehaviour(new ReservationCNPNegotiatorBehaviour(agent, cfpMessage));
+                    agent.addBehaviour(new ReservationCNPNegotiatorBehaviour(agent, customerAID, cfpMessage));
                     log.info("Successfully sent reservation CFP messages");
                 })
                 .onFailure((ex) -> log.info("Could not build reservation CFP message :( {}", ex));

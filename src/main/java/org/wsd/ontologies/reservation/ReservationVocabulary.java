@@ -20,4 +20,9 @@ public interface ReservationVocabulary {
 
 	public static final String RESERVATION_OFFER = "ReservationOffer";
 	public static final String RESERVATION_OFFER_SCORE = "score";
+	public static final String NUMBER_OF_SEATS = "numberOfSeats";
+
+	public static final String CONFIRM_RESERVATION_REQUEST = "ConfirmReservationRequest";
+	public static final String CONFIRM_RESERVATION_RESPONSE = "ConfirmReservationResponse";
+	public static final String LOCK_AID = "lockAID";
 }
