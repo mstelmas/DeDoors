@@ -19,9 +19,9 @@ public class ERESGate {
         users = new HashMap<>();
 
         // TODO consider authorizationLevels
-        addUser("wykladowca1@elka.pw.edu.pl", "tajne1", "Level0");
-        addUser("wykladowca2@elka.pw.edu.pl", "tajne2", "Level1");
-        addUser("wykladowca3@elka.pw.edu.pl", "tajne3", "Level2");
+        addUser("lecturer1@elka.pw.edu.pl", "password1", "Level0");
+        addUser("lecturer2@elka.pw.edu.pl", "password2", "Level1");
+        addUser("lecturer3@elka.pw.edu.pl", "password3", "Level2");
     }
 
     private void addUser(String email, String password, String authorizationLevel) {

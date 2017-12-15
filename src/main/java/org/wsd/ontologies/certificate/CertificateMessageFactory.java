@@ -7,8 +7,11 @@ import jade.lang.acl.ACLMessage;
 import jade.core.AID;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import sun.util.logging.resources.logging;
 
 @RequiredArgsConstructor
+@Slf4j
 public class CertificateMessageFactory {
 
     private final Agent agent;
@@ -21,9 +24,8 @@ public class CertificateMessageFactory {
         requestMessage.setOntology(CertificateOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(requestMessage, new Action(receiver, new AskForCertificateRequest()
-                    .withEmail(email).withPassword(password)
-            ));
+            agent.getContentManager().fillContent(requestMessage,
+                    new Action(receiver, new AskForCertificateRequest().withEmail(email).withPassword(password)));
             return requestMessage;
         });
     }

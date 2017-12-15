@@ -8,11 +8,13 @@ import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.agents.lecturer.UserAgentRoles;
 import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.ontologies.otp.GenerateOTPResponse;
+import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.otp.RefuseOTPGenerationResponse;
 import org.wsd.ontologies.reservation.CancelReservationResponse;
 import org.wsd.ontologies.reservation.RefuseReservationCancelationResponse;
@@ -25,6 +27,10 @@ public class LockResponseHandler extends SimpleBehaviour {
 
     private boolean isFinished = false;
     /* TODO: add sender filter */
+    private final MessageTemplate OTP_ONTOLOGY_MESSAGE_TEMPLATE = MessageTemplate.and(
+            MessageTemplate.MatchLanguage(OTPOntology.codec.getName()),
+            MessageTemplate.MatchOntology(OTPOntology.instance.getName())
+    );
 
     private final LecturerAgent agent;
     private final UserAgentRoles agentRole;
@@ -37,7 +43,7 @@ public class LockResponseHandler extends SimpleBehaviour {
 
     @Override
     public void action() {
-        final ACLMessage message = agent.receive();
+        final ACLMessage message = agent.receive(OTP_ONTOLOGY_MESSAGE_TEMPLATE);
 
         if (message == null) {
             block();

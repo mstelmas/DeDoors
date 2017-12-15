@@ -5,6 +5,7 @@ import jade.core.AID;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.AgentResolverService;
@@ -14,11 +15,13 @@ import org.wsd.agents.lecturer.behaviours.ReservationResponseHandler;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.agents.lecturer.reservations.ReservationsStateService;
+import org.wsd.agents.lecturer.behaviours.ResponseCertificateHandler;
+import org.wsd.ontologies.certificate.CertificateMessageFactory;
+import org.wsd.ontologies.certificate.CertificateOntology;
 import org.wsd.ontologies.otp.OTPMessageFactory;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
-import org.wsd.ontologies.reservation.ReservationOffer;
 import org.wsd.ontologies.reservation.ReservationOntology;
 
 import javax.swing.*;
@@ -27,6 +30,12 @@ import javax.swing.*;
 public class LecturerAgent extends GuiAgent {
 
 	transient private LecturerAgentGui lecturerAgentGui;
+
+	@Setter
+	private String certificate = "";
+	public void setCertificate(final String cert) {
+		certificate = cert;
+	}
 
     @Getter
     private final ReservationsStateService reservationsStateService = new ReservationsStateService();
@@ -38,10 +47,15 @@ public class LecturerAgent extends GuiAgent {
 	protected void setup() {
 		getContentManager().registerLanguage(OTPOntology.codec);
 		getContentManager().registerOntology(OTPOntology.instance);
+
 		getContentManager().registerLanguage(ReservationOntology.codec);
 		getContentManager().registerOntology(ReservationOntology.instance);
 
+		getContentManager().registerLanguage(CertificateOntology.codec);
+		getContentManager().registerOntology(CertificateOntology.instance);
+
 		addBehaviour(new ReservationResponseHandler(this));
+		addBehaviour(new ResponseCertificateHandler(this));
 
 		SwingUtilities.invokeLater(() -> lecturerAgentGui = new LecturerAgentGui(this));
 
@@ -72,8 +86,26 @@ public class LecturerAgent extends GuiAgent {
 		}
 	}
 
+	private void requestCertificateFromKeeper(final String email, String password) {
+		log.info("Requesting certificate from Keeper");
+
+		AgentResolverService agentResolverService = new AgentResolverService(this);
+		AID agent = agentResolverService.getRandomAgent(AgentTypes.KEEPER);
+
+		CertificateMessageFactory certificateMessageFactory = new CertificateMessageFactory(this);
+		certificateMessageFactory.buildAskForCertificateRequest(agent, email, password).onSuccess(requestAclMessage -> {
+			send(requestAclMessage);
+
+			log.info("AskForCertificateRequest successfully sent!");
+		}).onFailure(ex -> log.info("Could not send AskForCertificateRequest: {}", ex));
+	}
+
 	/* TODO: Refactor ugly enum passing... */
 	private void requestOTPFromLock(@NonNull final Reservation reservation, final UserAgentRoles userAgentRole) {
+		// TODO refactor, integrate into GUI or somewhere into statup
+		if (certificate == "")
+			requestCertificateFromKeeper("lecturer1@elka.pw.edu.pl", "password1");
+
 		log.info("Requesting OTP for reservation: {}", reservation);
 
 		otpMessageFactory.buildGenerateOTPRequest(reservation.getLock(), reservation.getId()).onSuccess(otpRequestAclMessage -> {

@@ -1,4 +1,4 @@
-package org.wsd.agents.keeper.behaviours;
+package org.wsd.agents.lecturer.behaviours;
 
 import io.vavr.control.Try;
 import jade.content.Concept;
@@ -6,27 +6,33 @@ import jade.content.ContentElement;
 import jade.content.onto.basic.Action;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
-import org.wsd.agents.keeper.KeeperAgent;
-import org.wsd.ontologies.certificate.AskForCertificateRequest;
+import org.wsd.agents.lecturer.LecturerAgent;
+import org.wsd.ontologies.certificate.AskForCertificateResponse;
 import org.wsd.ontologies.certificate.CertificateOntology;
 
 import static com.google.common.base.Predicates.instanceOf;
 import static io.vavr.API.*;
 
 @Slf4j
-public class RequestCertificateHandler extends CyclicBehaviour {
+public class ResponseCertificateHandler extends CyclicBehaviour {
 
-    private final KeeperAgent agent;
+    private final MessageTemplate CERTIFICATE_ONTOLOGY_MESSAGE_TEMPLATE = MessageTemplate.and(
+            MessageTemplate.MatchLanguage(CertificateOntology.codec.getName()),
+            MessageTemplate.MatchOntology(CertificateOntology.instance.getName())
+    );
 
-    public RequestCertificateHandler(final KeeperAgent agent) {
+    private final LecturerAgent agent;
+
+    public ResponseCertificateHandler(final LecturerAgent agent) {
         super(agent);
         this.agent = agent;
     }
 
     @Override
     public void action() {
-        final ACLMessage message = agent.receive();
+        final ACLMessage message = agent.receive(CERTIFICATE_ONTOLOGY_MESSAGE_TEMPLATE);
 
         if (message == null) {
             block();
@@ -45,9 +51,9 @@ public class RequestCertificateHandler extends CyclicBehaviour {
         final Concept action = ((Action) contentElement).getAction();
 
         switch (message.getPerformative()) {
-            case ACLMessage.REQUEST:
+            case ACLMessage.INFORM_IF:
                 Match(action).of(
-                        Case($(instanceOf(AskForCertificateRequest.class)), run(() -> agent.addBehaviour(new GenerateCertificateBehaviour(agent, message)))),
+                        Case($(instanceOf(AskForCertificateResponse.class)), run(() -> agent.addBehaviour(new ResponseCertificateBehaviour(agent, message)))),
                         Case($(), o -> run(() -> replyNotUnderstood(message)))
                 );
                 break;
