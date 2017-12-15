@@ -48,6 +48,10 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 			add(new ConceptSchema(CANCELED_RESERVATION), CancelReservationResponse.class);
 			final ConceptSchema canceledReservationConceptSchema = (ConceptSchema) getSchema(CANCELED_RESERVATION);
 			canceledReservationConceptSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+
+			add(new ConceptSchema(REFUSE_RESERVATION_CANCELATION), RefuseReservationCancelationResponse.class);
+			final ConceptSchema refusedReservationCancelationSchema = (ConceptSchema) getSchema(REFUSE_RESERVATION_CANCELATION);
+			refusedReservationCancelationSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
 		}).onFailure(ex -> log.error("Could not create Reservation ontology schema {}", ex));
 	}
 

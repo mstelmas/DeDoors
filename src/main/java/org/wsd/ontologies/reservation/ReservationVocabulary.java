@@ -4,6 +4,7 @@ public interface ReservationVocabulary {
 	public static final String ASK_FOR_RESERVATION = "GenerateReservationRequest";
 	public static final String CANCEL_RESERVATION = "CancelReservationRequest";
 	public static final String CANCELED_RESERVATION = "CancelReservationResponse";
+	public static final String REFUSE_RESERVATION_CANCELATION= "RefuseReservationCancelationResponse";
 	public static final String SELECTED_RESERVATION = "SelectedReservationResponse";
 	public static final String RESERVATION_ID = "reservationId";
 	public static final String DATE_SINCE = "dateSince";

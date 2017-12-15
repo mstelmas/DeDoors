@@ -14,6 +14,7 @@ import org.wsd.agents.lecturer.UserAgentRoles;
 import org.wsd.ontologies.otp.GenerateOTPResponse;
 import org.wsd.ontologies.otp.RefuseOTPGenerationResponse;
 import org.wsd.ontologies.reservation.CancelReservationResponse;
+import org.wsd.ontologies.reservation.RefuseReservationCancelationResponse;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
@@ -64,6 +65,7 @@ public class LockResponseHandler extends SimpleBehaviour {
             case ACLMessage.REFUSE:
                 Match(action).of(
                         Case($(instanceOf(RefuseOTPGenerationResponse.class)), o -> run(() -> handleRefusedOtpCodeGeneration((RefuseOTPGenerationResponse) action))),
+                        Case($(instanceOf(RefuseReservationCancelationResponse.class)), o -> run(() -> handleCanceledReservation(message.getSender(), (RefuseReservationCancelationResponse) action))),
                         Case($(), o -> run(() -> log.info("No handlers found for incoming message: {}", message)))
                 );
                 break;
@@ -79,6 +81,11 @@ public class LockResponseHandler extends SimpleBehaviour {
     private void handleCanceledReservation(final AID lock, final CancelReservationResponse cancelReservationResponse) {
         log.info("Reservation {} on {} successfully canceled!", cancelReservationResponse.getReservationId(), lock.getLocalName());
         /* TODO: remove cancelled reservation from ReservationStateService */
+    }
+
+    private void handleCanceledReservation(final AID lock, final RefuseReservationCancelationResponse refuseReservationCancelationResponse) {
+        log.info("Lock {} refused to cancel reservation {}!", lock.getLocalName(), refuseReservationCancelationResponse.getReservationId());
+        /* TODO: implement */
     }
 
     private void handleReceivedOtpCode(final GenerateOTPResponse generateOTPResponse) {

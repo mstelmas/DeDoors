@@ -104,15 +104,15 @@ public class ReservationMessageFactory {
 		});
 	}
 
-	public Try<ACLMessage> buildCancelReservationRefuseRequest(@NonNull final Reservation reservation) {
-		final ACLMessage cancelReservationMessage = new ACLMessage(ACLMessage.REFUSE);
+	public Try<ACLMessage> buildCancelReservationRefuseResponse(@NonNull final AID receiver, @NonNull final Integer reservationId) {
+		final ACLMessage refuseReservationCancelation = new ACLMessage(ACLMessage.REFUSE);
 
-		cancelReservationMessage.addReceiver(reservation.getLock());
-		cancelReservationMessage.setLanguage(ReservationOntology.codec.getName());
-		cancelReservationMessage.setOntology(ReservationOntology.instance.getName());
+		refuseReservationCancelation.addReceiver(receiver);
+		refuseReservationCancelation.setLanguage(ReservationOntology.codec.getName());
+		refuseReservationCancelation.setOntology(ReservationOntology.instance.getName());
 		return Try.of(() -> {
-			agent.getContentManager().fillContent(cancelReservationMessage, new Action(reservation.getLock(), new CancelReservationRequest().withReservationId(reservation.getId())));
-			return cancelReservationMessage;
+			agent.getContentManager().fillContent(refuseReservationCancelation, new Action(receiver, new RefuseReservationCancelationResponse().withReservationId(reservationId)));
+			return refuseReservationCancelation;
 		});
 	}
 }
