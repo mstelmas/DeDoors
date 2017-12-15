@@ -1,6 +1,5 @@
 package org.wsd.agents.keeper.behaviours;
 
-
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
