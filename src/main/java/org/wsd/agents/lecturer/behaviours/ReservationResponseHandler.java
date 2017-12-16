@@ -1,18 +1,5 @@
 package org.wsd.agents.lecturer.behaviours;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
-import static io.vavr.API.Match;
-import static io.vavr.API.run;
-import static io.vavr.Predicates.instanceOf;
-
-import org.wsd.agents.lecturer.LecturerAgent;
-import org.wsd.agents.lecturer.reservations.Reservation;
-import org.wsd.ontologies.MessageContentExtractor;
-import org.wsd.ontologies.reservation.ConfirmReservationResponse;
-import org.wsd.ontologies.reservation.ReservationOffer;
-import org.wsd.ontologies.reservation.ReservationOntology;
-
 import io.vavr.control.Try;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -21,6 +8,15 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.lecturer.LecturerAgent;
+import org.wsd.agents.lecturer.reservations.Reservation;
+import org.wsd.ontologies.MessageContentExtractor;
+import org.wsd.ontologies.reservation.ConfirmReservationResponse;
+import org.wsd.ontologies.reservation.ReservationOffer;
+import org.wsd.ontologies.reservation.ReservationOntology;
+
+import static io.vavr.API.*;
+import static io.vavr.Predicates.instanceOf;
 @Slf4j
 public class ReservationResponseHandler extends CyclicBehaviour {
 
@@ -40,7 +36,7 @@ public class ReservationResponseHandler extends CyclicBehaviour {
 
     @Override
     public void action() {
-        final ACLMessage message = agent.receive();
+        final ACLMessage message = agent.receive(RESERVATION_MESSAGE_TEMPLATE);
 
         if (message == null) {
             block();
