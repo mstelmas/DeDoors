@@ -13,4 +13,5 @@ public class LockConfiguration {
     private Boolean hasMultimediaProjector;
     private Boolean hasTV;
     private Integer area;
+    private Integer requiredAuthorizationLevel;
 }

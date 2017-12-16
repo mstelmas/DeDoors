@@ -12,6 +12,7 @@ import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
 import org.wsd.agents.lecturer.behaviours.ReservationResponseHandler;
+import org.wsd.agents.lecturer.configuration.LecturerConfigurationProvider;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.agents.lecturer.reservations.ReservationsStateService;
@@ -60,8 +61,12 @@ public class LecturerAgent extends GuiAgent {
 		SwingUtilities.invokeLater(() -> lecturerAgentGui = new LecturerAgentGui(this));
 
 		// TODO refactor, integrate into GUI or somewhere into statup
-		if (certificate == "")
-			requestCertificateFromKeeper("lecturer1@elka.pw.edu.pl", "password1");
+		if (certificate == "") {
+			LecturerConfigurationProvider lecturerConfigurationProvider = new LecturerConfigurationProvider(this);
+			String email = lecturerConfigurationProvider.provide().get().getEmail();
+			String password = lecturerConfigurationProvider.provide().get().getPassword();
+			requestCertificateFromKeeper(email, password);
+		}
 	}
 
 	@Override

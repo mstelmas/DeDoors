@@ -3,7 +3,7 @@ package org.wsd.agents.keeper.authorization;
 import java.util.Objects;
 
 public class User {
-    private static final String NO_AUTHORIZATION_GRANTED = "ERROR";
+    private static final String NO_AUTHORIZATION_GRANTED = "0";
 
     private final String email;
 

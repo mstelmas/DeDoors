@@ -14,8 +14,7 @@ public class PermissionValidator {
         final String certificate = generateOTPRequest.getCertificate();
         final int level = Integer.parseInt(certificate.replace("privateKeyLevel",""));
 
-        String requiredAuthorization = agent.getRequiredAuthorization();
-        final int requiredLevel = Integer.parseInt(requiredAuthorization.replace("Level", ""));
+        final int requiredLevel = agent.getRequiredAuthorization();
 
         if (level >= requiredLevel) {
             return Validation.valid("ok");

@@ -15,6 +15,7 @@ import org.wsd.agents.lock.behaviours.LockOTPMessageHandler;
 import org.wsd.agents.lock.behaviours.LockReservationMessageHandler;
 import org.wsd.agents.lock.behaviours.PermissionsHandler;
 import org.wsd.agents.lock.behaviours.ReservationCNPLockBehaviour;
+import org.wsd.agents.lock.configuration.LockConfigurationProvider;
 import org.wsd.agents.lock.gui.LockAgentGui;
 import org.wsd.agents.lock.otp.OtpStateService;
 import org.wsd.ontologies.certificate.CertificateMessageFactory;
@@ -41,7 +42,7 @@ public class LockAgent extends GuiAgent {
     @Setter
     private String permissions = "";
     @Getter
-    private String requiredAuthorization = "Level0";
+    private int requiredAuthorization = 999;
 
     private final MessageTemplate RESERVATION_CNP_MESSAGE_TEMPLATE = MessageTemplate.and(
             MessageTemplate.and(
@@ -56,6 +57,9 @@ public class LockAgent extends GuiAgent {
 
     @Override
     protected void setup() {
+        LockConfigurationProvider lockConfigurationProvider = new LockConfigurationProvider(this);
+        requiredAuthorization = lockConfigurationProvider.provide().get().getRequiredAuthorizationLevel();
+
         getContentManager().registerLanguage(OTPOntology.codec);
         getContentManager().registerOntology(OTPOntology.instance);
 

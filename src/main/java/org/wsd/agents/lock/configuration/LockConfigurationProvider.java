@@ -19,6 +19,7 @@ public class LockConfigurationProvider {
     private final String HAS_MULTIMEDIA_PROJECTOR_KEY = "has.multimedia.projector";
     private final String HAS_TV_KEY = "has.tv";
     private final String AREA_KEY = "area";
+    private final String REQUIRED_AUTHORIZATION_LEVEL = "required.authorization.level";
 
     private final Configurations configurations = new Configurations();
 
@@ -50,6 +51,7 @@ public class LockConfigurationProvider {
                 .hasMultimediaProjector(propertiesConfiguration.getBoolean(HAS_MULTIMEDIA_PROJECTOR_KEY, false))
                 .hasTV(propertiesConfiguration.getBoolean(HAS_TV_KEY, false))
                 .area(propertiesConfiguration.getInteger(AREA_KEY, 0))
+                .requiredAuthorizationLevel(propertiesConfiguration.getInteger(REQUIRED_AUTHORIZATION_LEVEL, 1))
                 .build();
     }
 }
