@@ -161,4 +161,13 @@ public class ReservationMessageFactory {
 			return informReservationConfirmed;
 		});
 	}
+
+	public ACLMessage buildRefuseReservationResponse(@NonNull final ACLMessage cfp) {
+		final ACLMessage refuseACLMessage = cfp.createReply();
+
+		refuseACLMessage.setPerformative(ACLMessage.REFUSE);
+		refuseACLMessage.setLanguage(ReservationOntology.codec.getName());
+		refuseACLMessage.setOntology(ReservationOntology.instance.getName());
+		return refuseACLMessage;
+	}
 }

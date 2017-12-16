@@ -51,7 +51,7 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
             return;
         }
 
-        final ACLMessage bestOfferMessage = ((Vector<ACLMessage>) responses).stream()
+        final ACLMessage bestOfferMessage = ((Vector<ACLMessage>) responses).stream().filter(m -> m.getPerformative() == ACLMessage.PROPOSE)
                 .map(response -> Pair.of(messageContentExtractor.extract(response, ReservationOffer.class).get(),
                         response))
                 .min((offer1, offer2) -> ReservationOfferService.reservationOfferScoreComparator
