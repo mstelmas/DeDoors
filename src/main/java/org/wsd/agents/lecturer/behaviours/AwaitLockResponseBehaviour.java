@@ -14,8 +14,9 @@ public class AwaitLockResponseBehaviour extends ParallelBehaviour {
 	public AwaitLockResponseBehaviour(final LecturerAgent agent, final UserAgentRoles userAgentRole) {
 		super(agent, 1);
 
-		addSubBehaviour(new LockResponseHandler(agent, userAgentRole));
+		addSubBehaviour(new OTPLockResponseHandler(agent, userAgentRole));
 
+		/* TODO: remove/refactor */
 		addSubBehaviour(new WakerBehaviour(agent, LOCK_RESPONSE_TIMEOUT_MS) {
 			@Override
 			protected void onWake() {
