@@ -13,8 +13,6 @@ public class KeeperAgent extends Agent {
         getContentManager().registerLanguage(CertificateOntology.codec);
         getContentManager().registerOntology(CertificateOntology.instance);
 
-        // TODO create and add behaviours
         addBehaviour(new RequestCertificateHandler(this));
-//        addBehaviour(new RequestPermissionsMessageHandler(this));
     }
 }

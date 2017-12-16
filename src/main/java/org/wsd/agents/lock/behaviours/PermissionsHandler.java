@@ -1,4 +1,4 @@
-package org.wsd.agents.keeper.behaviours;
+package org.wsd.agents.lock.behaviours;
 
 import io.vavr.control.Try;
 import jade.content.Concept;
@@ -8,25 +8,24 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
-import org.wsd.agents.keeper.KeeperAgent;
-import org.wsd.ontologies.certificate.AskForCertificateRequest;
-import org.wsd.ontologies.certificate.AskForPermissionsRequest;
+import org.wsd.agents.lock.LockAgent;
+import org.wsd.ontologies.certificate.AskForPermissionsResponse;
 import org.wsd.ontologies.certificate.CertificateOntology;
 
 import static com.google.common.base.Predicates.instanceOf;
 import static io.vavr.API.*;
 
 @Slf4j
-public class RequestCertificateHandler extends CyclicBehaviour {
+public class PermissionsHandler extends CyclicBehaviour {
 
     private final MessageTemplate CERTIFICATE_ONTOLOGY_MESSAGE_TEMPLATE = MessageTemplate.and(
             MessageTemplate.MatchLanguage(CertificateOntology.codec.getName()),
             MessageTemplate.MatchOntology(CertificateOntology.instance.getName())
     );
 
-    private final KeeperAgent agent;
+    private final LockAgent agent;
 
-    public RequestCertificateHandler(final KeeperAgent agent) {
+    public PermissionsHandler(final LockAgent agent) {
         super(agent);
         this.agent = agent;
     }
@@ -52,12 +51,10 @@ public class RequestCertificateHandler extends CyclicBehaviour {
         final Concept action = ((Action) contentElement).getAction();
 
         switch (message.getPerformative()) {
-            case ACLMessage.REQUEST:
+            case ACLMessage.INFORM_IF:
                 Match(action).of(
-                        Case($(instanceOf(AskForCertificateRequest.class)), o -> run(
-                                () -> agent.addBehaviour(new GenerateCertificateBehaviour(agent, message)))),
-                        Case($(instanceOf(AskForPermissionsRequest.class)), o -> run(
-                                () -> agent.addBehaviour(new GeneratePermissionsBehaviour(agent, message)))),
+                        Case($(instanceOf(AskForPermissionsResponse.class)), o -> run(
+                                () -> agent.addBehaviour(new PermissionsBehaviour(agent, message)))),
                         Case($(), o -> run(() -> replyNotUnderstood(message)))
                 );
                 break;

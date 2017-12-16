@@ -13,7 +13,7 @@ public class CertificateProvider {
         return certificate;
     }
 
-    public String providePermissions() {
+    public String getPermissions() {
         return new String(publicKey);
     }
 }

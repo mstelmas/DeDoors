@@ -8,6 +8,7 @@ public interface CertificateVocabulary {
     public static final String ASK_FOR_CERIFICATE_RESPONSE = "ResponseNewCertificate";
     public static final String CERIFICATE = "certificate";
 
-    public static final String ASK_FOR_PERMISSIONS = "RequestKeyRequiredToCertificateValidation";
-    public static final String PERSMISSIONS = "privateKey";
+    public static final String ASK_FOR_PERMISSIONS_REQUEST = "RequestPermissionsEncryptionKey";
+    public static final String ASK_FOR_PERMISSIONS_RESPONSE = "ResponsePermissionsEncryptionKey";
+    public static final String PERSMISSIONS = "permissions";
 }

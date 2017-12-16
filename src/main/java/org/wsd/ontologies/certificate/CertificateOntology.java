@@ -32,16 +32,12 @@ public class CertificateOntology extends Ontology implements CertificateVocabula
                 AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_CERIFICATE_RESPONSE);
                 aas.add(CERIFICATE, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
             }
+            add(new AgentActionSchema(ASK_FOR_PERMISSIONS_REQUEST), AskForPermissionsRequest.class);
             {
-                add(new AgentActionSchema(ASK_FOR_PERMISSIONS), AskForPermissionsRequest.class);
-//                AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_PERMISSIONS);
-            }
-            {
-                add(new AgentActionSchema(ASK_FOR_PERMISSIONS), AskForPermissionsResponse.class);
-                AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_PERMISSIONS);
+                add(new AgentActionSchema(ASK_FOR_PERMISSIONS_RESPONSE), AskForPermissionsResponse.class);
+                AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_PERMISSIONS_RESPONSE);
                 aas.add(PERSMISSIONS, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
             }
-
         }).onFailure(ex -> log.error("Could not create Reservation ontology schema {}", ex));
     }
 }

@@ -59,6 +59,9 @@ public class LecturerAgent extends GuiAgent {
 
 		SwingUtilities.invokeLater(() -> lecturerAgentGui = new LecturerAgentGui(this));
 
+		// TODO refactor, integrate into GUI or somewhere into statup
+		if (certificate == "")
+			requestCertificateFromKeeper("lecturer1@elka.pw.edu.pl", "password1");
 	}
 
 	@Override
@@ -87,8 +90,6 @@ public class LecturerAgent extends GuiAgent {
 	}
 
 	private void requestCertificateFromKeeper(final String email, String password) {
-		log.info("Requesting certificate from Keeper");
-
 		AgentResolverService agentResolverService = new AgentResolverService(this);
 		AID agent = agentResolverService.getRandomAgent(AgentTypes.KEEPER);
 
@@ -102,10 +103,6 @@ public class LecturerAgent extends GuiAgent {
 
 	/* TODO: Refactor ugly enum passing... */
 	private void requestOTPFromLock(@NonNull final Reservation reservation, final UserAgentRoles userAgentRole) {
-		// TODO refactor, integrate into GUI or somewhere into statup
-		if (certificate == "")
-			requestCertificateFromKeeper("lecturer1@elka.pw.edu.pl", "password1");
-
 		log.info("Requesting OTP for reservation: {}", reservation);
 
 		otpMessageFactory.buildGenerateOTPRequest(reservation.getLock(), reservation.getId()).onSuccess(otpRequestAclMessage -> {
