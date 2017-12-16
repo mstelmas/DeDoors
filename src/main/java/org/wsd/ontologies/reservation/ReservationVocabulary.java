@@ -25,4 +25,6 @@ public interface ReservationVocabulary {
 	public static final String CONFIRM_RESERVATION_REQUEST = "ConfirmReservationRequest";
 	public static final String CONFIRM_RESERVATION_RESPONSE = "ConfirmReservationResponse";
 	public static final String LOCK_AID = "lockAID";
+
+	public static final String CERTIFICATE = "certificate";
 }

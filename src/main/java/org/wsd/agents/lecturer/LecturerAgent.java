@@ -78,7 +78,7 @@ public class LecturerAgent extends GuiAgent {
 	@Override
 	protected void onGuiEvent(final GuiEvent guiEvent) {
 		final int commandType = guiEvent.getType();
-
+		
 		Match(guiEvent.getType()).of(
 				Case($(LecturerGuiEvents.NEW_OTP_FOR_LECTURER), o -> API.run(() -> requestOTPFromLock((Reservation) guiEvent.getAllParameter().next(), UserAgentRoles.USER_LECTURER))),
 				Case($(LecturerGuiEvents.NEW_OTP_FOR_TECHNICIAN), o -> API.run(() -> requestOTPFromLock(new Reservation(null, (AID)guiEvent.getAllParameter().next()), UserAgentRoles.USER_TECHNICIAN))),
@@ -122,6 +122,8 @@ public class LecturerAgent extends GuiAgent {
 	}
 
 	private void askRandomLockForReservation(@NonNull final ReservationDataRequest data) {
+		data.setCertificate(certificate);
+
 		AgentResolverService agentResolverService = new AgentResolverService(this);
 		AID lockAgent = agentResolverService.getRandomAgent(AgentTypes.LOCK);
 		log.info("Sending reservation request, negotiator is: {}", lockAgent);

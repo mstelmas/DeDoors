@@ -24,4 +24,5 @@ public class ReservationDataRequest implements AgentAction {
     private Boolean isTVRequired;
     private Integer numberOfComputers;
     private Integer specificRoomNumber;
+    private String certificate;
 }

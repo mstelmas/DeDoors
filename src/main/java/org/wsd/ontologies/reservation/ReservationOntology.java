@@ -35,6 +35,7 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 			as.add(IS_MULTIMEDIA_PROJECTOR_REQUIRED, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN), ObjectSchema.OPTIONAL);
 			as.add(IS_TV_REQUIRED, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN), ObjectSchema.OPTIONAL);
 			as.add(SPECIFIC_ROOM_NUMBER, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
+			as.add(CERTIFICATE, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
 
 			add(new ConceptSchema(RESERVATION_OFFER), ReservationOffer.class);
 

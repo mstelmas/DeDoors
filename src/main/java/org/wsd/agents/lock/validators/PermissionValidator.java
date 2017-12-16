@@ -12,14 +12,22 @@ public class PermissionValidator {
 
     public Validation<String, String> validateActionPermissions(LockAgent agent, @NonNull final ACLMessage message, @NonNull final GenerateOTPRequest generateOTPRequest) {
         final String certificate = generateOTPRequest.getCertificate();
-        final int level = Integer.parseInt(certificate.replace("privateKeyLevel",""));
-
         final int requiredLevel = agent.getRequiredAuthorization();
 
-        if (level >= requiredLevel) {
+        if (isPermissionsValid(certificate, requiredLevel)) {
             return Validation.valid("ok");
         } else {
             return Validation.invalid("AuthorizationLevel is not enough");
         }
     }
+
+    public static Boolean isPermissionsValid(final String certificate, final int permissionsLevel) {
+        final int level = Integer.parseInt(certificate.replace("privateKeyLevel",""));
+        if (level >= permissionsLevel) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

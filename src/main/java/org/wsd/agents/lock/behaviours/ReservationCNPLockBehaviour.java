@@ -4,6 +4,7 @@ import org.wsd.agents.lock.LockAgent;
 import org.wsd.agents.lock.configuration.LockConfiguration;
 import org.wsd.agents.lock.configuration.LockConfigurationProvider;
 import org.wsd.agents.lock.reservations.ReservationOfferService;
+import org.wsd.agents.lock.validators.PermissionValidator;
 import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
@@ -74,6 +75,11 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
 
     private boolean isMeetingRequirements(ReservationDataRequest request, LockConfiguration lockConfig) {
         log.info("Check if room meets reqirements: {}, lock configuration {}", request, lockConfig);
+
+        if(!PermissionValidator.isPermissionsValid(request.getCertificate(), lockConfig.getRequiredAuthorizationLevel())) {
+            return false;
+        }
+
         if(request.getNumberOfParticipants() > lockConfig.getNumberOfSeats()) {
             return false;
         }
