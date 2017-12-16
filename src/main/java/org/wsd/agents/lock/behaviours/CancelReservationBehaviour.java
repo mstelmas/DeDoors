@@ -25,7 +25,7 @@ public class CancelReservationBehaviour extends OneShotBehaviour {
     @Override
     public void action() {
         /* TODO: INFORM/REFUSE reservation cancelation based on validation */
-        reservationMessageFactory.buildCancelReservationInformResponse(cancelReservationMessage.getSender(), cancelReservationRequest.getReservationId())
+        reservationMessageFactory.buildCancelReservationInformResponse(cancelReservationMessage, cancelReservationRequest.getReservationId())
                 .onSuccess(agent::send)
                 .onFailure(ex -> {
                     log.error("Could not send CancelReservationMessage Inform: {}", ex);

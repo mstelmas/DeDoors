@@ -2,6 +2,7 @@ package org.wsd.agents.lock.behaviours;
 
 import jade.core.AID;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.wsd.AgentResolverService;
@@ -20,15 +21,15 @@ public class PerformReservationCNPBehaviour extends OneShotBehaviour {
 	private final ReservationMessageFactory reservationMessageFactory;
 	private final ReservationDataRequest reservationRequestData;
     private final AgentResolverService agentResolverService;
-    private AID customerAID;
+    private final ACLMessage reservationRequestMessage;
 
-	public PerformReservationCNPBehaviour(final LockAgent agent, AID customerAID, final ReservationDataRequest reservationRequest) {
+	public PerformReservationCNPBehaviour(final LockAgent agent, final ACLMessage reservationRequestMessage, final ReservationDataRequest reservationRequest) {
 		super(agent);
 		this.agent = agent;
 		this.reservationMessageFactory = new ReservationMessageFactory(agent);
 		this.reservationRequestData = reservationRequest;
         this.agentResolverService = new AgentResolverService(agent);
-        this.customerAID = customerAID;
+        this.reservationRequestMessage = reservationRequestMessage;
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class PerformReservationCNPBehaviour extends OneShotBehaviour {
 
         reservationMessageFactory.buildCallForProposalRequest(candidateLockAgents, reservationRequestData)
                 .onSuccess(cfpMessage -> {
-                    agent.addBehaviour(new ReservationCNPNegotiatorBehaviour(agent, customerAID, cfpMessage));
+                    agent.addBehaviour(new ReservationCNPNegotiatorBehaviour(agent, reservationRequestMessage, cfpMessage));
                     log.info("Successfully sent reservation CFP messages");
                 })
                 .onFailure((ex) -> log.info("Could not build reservation CFP message :( {}", ex));

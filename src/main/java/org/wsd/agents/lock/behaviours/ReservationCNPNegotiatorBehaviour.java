@@ -1,6 +1,5 @@
 package org.wsd.agents.lock.behaviours;
 
-import jade.core.AID;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
@@ -19,13 +18,13 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
 
     private final ReservationMessageFactory reservationMessageFactory;
     private final MessageContentExtractor messageContentExtractor;
-    private final AID customerAID;
+    private final ACLMessage reservationRequestMessage;
 
-    public ReservationCNPNegotiatorBehaviour(final Agent agent, AID customerAID, final ACLMessage cfpMessage) {
+    public ReservationCNPNegotiatorBehaviour(final Agent agent, final ACLMessage reservationRequestMessage, final ACLMessage cfpMessage) {
         super(agent, cfpMessage);
         this.reservationMessageFactory = new ReservationMessageFactory(agent);
         this.messageContentExtractor = new MessageContentExtractor(agent);
-        this.customerAID = customerAID;
+        this.reservationRequestMessage = reservationRequestMessage;
     }
 
     /* TODO: Timeout handling */
@@ -84,7 +83,7 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
 
         //Sending inform message to lecturer agent
         messageContentExtractor.extract(bestOfferMessage, ReservationOffer.class).ifPresent(bestOffer -> {
-            reservationMessageFactory.buildOfferReservationInform(customerAID, bestOffer)
+            reservationMessageFactory.buildOfferReservationInform(reservationRequestMessage, bestOffer)
                     .onSuccess(offerReservationAclMessage -> {
                         myAgent.send(offerReservationAclMessage);
                         log.info("Succesfully send reservation details to lecturer: {}", offerReservationAclMessage);

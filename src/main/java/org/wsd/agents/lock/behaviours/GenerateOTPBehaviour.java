@@ -59,13 +59,10 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
 
         log.info("Generated OTP code for request: {} is: {}", otpRequestMessage, otpCode);
 
-        otpMessageFactory.buildGenerateOTPResponse(otpRequestMessage.getSender(), otpCode, generateOTPRequest.getReservationId())
-                .onSuccess(otpResponseAclMessage -> {
-                    agent.send(otpResponseAclMessage);
-                    log.info("GenerateOTPResponse successfully sent!");
-                })
+        otpMessageFactory.buildGenerateOTPResponse(otpRequestMessage, otpCode, generateOTPRequest.getReservationId())
+                .onSuccess(agent::send)
                 .onFailure(ex -> {
-                    log.info("Could not send GenerateOTPResponse: {}", ex);
+                    log.info("Could not send generated OTP response: {}", ex);
                     agent.getOtpStateService().invalidate();
                 });
     }
@@ -73,13 +70,10 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
     private void refuseOTPGenerationRequest(final Seq<String> rejectionReasons) {
         log.info("Refusing OTP code generation because of: {} for request {}", rejectionReasons, otpRequestMessage);
 
-        otpMessageFactory.buildRefuseOTPGenerationResponse(otpRequestMessage.getSender(), rejectionReasons.mkString(","))
-                .onSuccess(otpRejectionAclMessage -> {
-                    agent.send(otpRejectionAclMessage);
-                    log.info("GenerateOTPRequest successfully rejected!");
-                })
+        otpMessageFactory.buildRefuseOTPGenerationResponse(otpRequestMessage, rejectionReasons.mkString(","))
+                .onSuccess(agent::send)
                 .onFailure(ex -> {
-                    log.info("Could not send GenerateOTPRequest rejection: {}", ex);
+                    log.error("Could not send OTP generation rejection response: {}", ex);
                 });
     }
 }

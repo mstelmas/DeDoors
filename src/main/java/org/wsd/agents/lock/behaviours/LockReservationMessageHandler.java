@@ -60,7 +60,7 @@ public class LockReservationMessageHandler extends CyclicBehaviour {
 		case ACLMessage.REQUEST:
 			Match(action).of(
 					Case($(instanceOf(ReservationDataRequest.class)), o -> run(
-							() -> agent.addBehaviour(new PerformReservationCNPBehaviour(agent, message.getSender(), (ReservationDataRequest) action)))),
+							() -> agent.addBehaviour(new PerformReservationCNPBehaviour(agent, message, (ReservationDataRequest) action)))),
 					Case($(instanceOf(CancelReservationRequest.class)), o-> run(
 							() -> agent.addBehaviour(new CancelReservationBehaviour(agent, message, (CancelReservationRequest) action)))),
 					Case($(), o -> run(() -> replyNotUnderstood(message))));

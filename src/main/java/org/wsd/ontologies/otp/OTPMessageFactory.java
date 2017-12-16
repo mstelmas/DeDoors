@@ -7,11 +7,14 @@ import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.wsd.agents.ConversationIdGenerator;
 
 @RequiredArgsConstructor
 public class OTPMessageFactory {
 
     private final Agent agent;
+
+    private final ConversationIdGenerator conversationIdGenerator = new ConversationIdGenerator();
 
     public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver, final Integer reservationId) {
         final ACLMessage otpRequestMessage = new ACLMessage(ACLMessage.REQUEST);
@@ -19,6 +22,7 @@ public class OTPMessageFactory {
         otpRequestMessage.addReceiver(receiver);
         otpRequestMessage.setLanguage(OTPOntology.codec.getName());
         otpRequestMessage.setOntology(OTPOntology.instance.getName());
+        otpRequestMessage.setConversationId(conversationIdGenerator.generate());
 
         return Try.of(() -> {
             agent.getContentManager().fillContent(otpRequestMessage, new Action(receiver, new GenerateOTPRequest().withReservationId(reservationId)));
@@ -26,28 +30,28 @@ public class OTPMessageFactory {
         });
     }
 
-    public Try<ACLMessage> buildGenerateOTPResponse(@NonNull final AID receiver, String otpCode, Integer reservationId) {
-        final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.INFORM);
+    public Try<ACLMessage> buildGenerateOTPResponse(@NonNull final ACLMessage otpRequestMessage, String otpCode, Integer reservationId) {
+        final ACLMessage otpResponseMessage = otpRequestMessage.createReply();
 
-        otpResponseMessage.addReceiver(receiver);
+        otpResponseMessage.setPerformative(ACLMessage.INFORM);
         otpResponseMessage.setLanguage(OTPOntology.codec.getName());
         otpResponseMessage.setOntology(OTPOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpResponseMessage, new Action(receiver, new GenerateOTPResponse().withOtpCode(otpCode).withReservationId(reservationId)));
+            agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequestMessage.getSender(), new GenerateOTPResponse().withOtpCode(otpCode).withReservationId(reservationId)));
             return otpResponseMessage;
         });
     }
 
-    public Try<ACLMessage> buildRefuseOTPGenerationResponse(@NonNull final AID receiver, String rejectionReason) {
-        final ACLMessage otpResponseMessage = new ACLMessage(ACLMessage.REFUSE);
+    public Try<ACLMessage> buildRefuseOTPGenerationResponse(@NonNull final ACLMessage otpRequestMessage, String rejectionReason) {
+        final ACLMessage otpResponseMessage = otpRequestMessage.createReply();
 
-        otpResponseMessage.addReceiver(receiver);
+        otpResponseMessage.setPerformative(ACLMessage.REFUSE);
         otpResponseMessage.setLanguage(OTPOntology.codec.getName());
         otpResponseMessage.setOntology(OTPOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpResponseMessage, new Action(receiver, new RefuseOTPGenerationResponse().withRejectionReasons(rejectionReason)));
+            agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequestMessage.getSender(), new RefuseOTPGenerationResponse().withRejectionReasons(rejectionReason)));
             return otpResponseMessage;
         });
     }
