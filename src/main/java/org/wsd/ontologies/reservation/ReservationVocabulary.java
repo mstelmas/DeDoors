@@ -15,7 +15,7 @@ public interface ReservationVocabulary {
 	public static final String IS_LABORATORY = "isLaboratory";
 	public static final String IS_SEMINARY_HALL = "isSeminaryHall";
 	public static final String IS_MULTIMEDIA_PROJECTOR_REQUIRED = "isMultimediaProjectorRequired";
-	public static final String IS_TV_REQUIRED = "numberOfComputers";
+	public static final String IS_TV_REQUIRED = "isTVRequired";
 	public static final String SPECIFIC_ROOM_NUMBER = "specificRoomNumber";
 
 	public static final String RESERVATION_OFFER = "ReservationOffer";
