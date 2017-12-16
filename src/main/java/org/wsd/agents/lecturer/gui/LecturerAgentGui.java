@@ -14,6 +14,7 @@ import org.wsd.agents.lecturer.LecturerAgent;
 import org.wsd.agents.lecturer.LecturerGuiEvents;
 import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
+import org.wsd.ontologies.reservation.ReservationOffer;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -256,6 +257,39 @@ public class LecturerAgentGui extends JFrame {
         final DefaultListModel<Reservation> availableReservationsListModel = new DefaultListModel<>();
         lecturerAgent.getReservationsStateService().findAll().forEach(availableReservationsListModel::addElement);
         agentReservationsList.setModel(availableReservationsListModel);
+    }
+
+    public void confirmReservationOffer(final ReservationOffer reservationOffer) {
+	    final Object[] choices = { "Accept", "Reject" };
+	    final int choice = JOptionPane.showOptionDialog(
+	            this,
+	            String.format(
+	                    "Reservation offer received from %s\n\n" +
+                        "Offer ID: %d\n" +
+                        "Seats: %d\n" +
+                        "Computers: %d\n" +
+                        "Cost: %d\n\n",
+                        reservationOffer.getLockAID().getLocalName(), reservationOffer.getId(),
+                        reservationOffer.getNumberOfSeats(), reservationOffer.getNumberOfComputers(),
+                        reservationOffer.getScore()),
+                "Reservation offer",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                choices,
+                choices[0]
+        );
+
+        final Reservation reservation = new Reservation(reservationOffer.getId(), reservationOffer.getLockAID());
+	    if (choice == JOptionPane.YES_OPTION) {
+            final GuiEvent acceptReservationOfferEvent = new GuiEvent(this, LecturerGuiEvents.ACCEPT_RESERVATION_OFFER);
+            acceptReservationOfferEvent.addParameter(reservation);
+            lecturerAgent.postGuiEvent(acceptReservationOfferEvent);
+        } else if (choice == JOptionPane.NO_OPTION) {
+            final GuiEvent rejectReservationOfferEvent = new GuiEvent(this, LecturerGuiEvents.REJECT_RESERVATION_OFFER);
+            rejectReservationOfferEvent.addParameter(reservation);
+            lecturerAgent.postGuiEvent(rejectReservationOfferEvent);
+        }
     }
 
 	public void refreshLecturerOtp(final Either<String, String> otpCodeOrRefusalReasons) {

@@ -23,4 +23,8 @@ public class ReservationsStateService {
     public void remove(final Reservation reservation) {
         lecturerReservations.remove(reservation);
     }
+
+    public void add(final Reservation reservation) {
+        lecturerReservations.add(reservation);
+    }
 }

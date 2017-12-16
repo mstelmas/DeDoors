@@ -57,7 +57,7 @@ public class ReservationResponseHandler extends CyclicBehaviour {
             case ACLMessage.INFORM:
                 Match(action).of(
                         Case($(instanceOf(ReservationOffer.class)), o -> run(() -> onReservationReceived(message))),
-                        Case($(instanceOf(ConfirmReservationResponse.class)), o -> run(() -> onReservationConfimed(message))),
+                        Case($(instanceOf(ConfirmReservationResponse.class)), o -> run(() -> onReservationConfirmed(message))),
                         Case($(instanceOf(CancelReservationResponse.class)), o -> run(() -> handleCanceledReservation(message.getSender(), (CancelReservationResponse)action))),
                         Case($(), o -> run(() -> log.warn("No handlers found for incoming message: {}", message)))
                 );
@@ -77,17 +77,19 @@ public class ReservationResponseHandler extends CyclicBehaviour {
 
     private void onReservationReceived(ACLMessage message) {
         log.info("Received reservation offer from NEGOTIATOR {}", message);
-        //TODO: Add reservation to LecturerAgent and its GUI
         messageContentExtractor.extract(message, ReservationOffer.class).ifPresent(offer -> {
             Reservation reservation = new Reservation(offer.getId(), offer.getLockAID());
-            agent.addReservationOffer(reservation);
+            agent.onReservationReceived(offer);
         });
 
     }
 
-    private void onReservationConfimed(ACLMessage message) {
-        //TODO: Show confirmed reservation in GUI
+    private void onReservationConfirmed(ACLMessage message) {
         log.info("Reservation confirmed succesfully: {}", message);
+        messageContentExtractor.extract(message, ConfirmReservationResponse.class).ifPresent(offer -> {
+            agent.getReservationsStateService().add(new Reservation(offer.getReservationId(), message.getSender()));
+            agent.updateReservations();
+        });
     }
 
     private void handleCanceledReservation(final AID lock, final CancelReservationResponse cancelReservationResponse) {

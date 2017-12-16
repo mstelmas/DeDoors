@@ -1,31 +1,37 @@
 package org.wsd.agents.lecturer;
 
+import io.vavr.API;
 import io.vavr.control.Either;
 import jade.core.AID;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.AgentResolverService;
 import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lecturer.behaviours.AwaitLockResponseBehaviour;
 import org.wsd.agents.lecturer.behaviours.ReservationResponseHandler;
+import org.wsd.agents.lecturer.behaviours.ResponseCertificateHandler;
 import org.wsd.agents.lecturer.configuration.LecturerConfigurationProvider;
 import org.wsd.agents.lecturer.gui.LecturerAgentGui;
 import org.wsd.agents.lecturer.reservations.Reservation;
 import org.wsd.agents.lecturer.reservations.ReservationsStateService;
-import org.wsd.agents.lecturer.behaviours.ResponseCertificateHandler;
 import org.wsd.ontologies.certificate.CertificateMessageFactory;
 import org.wsd.ontologies.certificate.CertificateOntology;
 import org.wsd.ontologies.otp.OTPMessageFactory;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
+import org.wsd.ontologies.reservation.ReservationOffer;
 import org.wsd.ontologies.reservation.ReservationOntology;
 
 import javax.swing.*;
+
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
+import static io.vavr.API.Match;
 
 @Slf4j
 public class LecturerAgent extends GuiAgent {
@@ -73,28 +79,17 @@ public class LecturerAgent extends GuiAgent {
 	protected void onGuiEvent(final GuiEvent guiEvent) {
 		final int commandType = guiEvent.getType();
 
-		if (commandType == LecturerGuiEvents.NEW_OTP_FOR_LECTURER) {
-			requestOTPFromLock((Reservation) guiEvent.getAllParameter().next(), UserAgentRoles.USER_LECTURER);
-		} else if (commandType == LecturerGuiEvents.NEW_OTP_FOR_TECHNICIAN) {
-		    /*
-		       TODO: This is a temporal hack to reuse existing metod for generating
-		             OTP for USER_LECTURER.
-
-		             We create a dummy reservation for USER_TECHNICIAN, but when
-		             the permissions are done this should not be necessary because
-		             user role will be checked by a lock
-		     */
-            requestOTPFromLock(new Reservation(null, (AID)guiEvent.getAllParameter().next()), UserAgentRoles.USER_TECHNICIAN);
-        } else if (commandType == LecturerGuiEvents.ASK_FOR_RESERVATION) {
-			ReservationDataRequest data = (ReservationDataRequest) guiEvent.getAllParameter().next();
-			askRandomLockForReservation(data);
-			log.info("Reservatuon data: {}", data);
-		} else if (commandType == LecturerGuiEvents.CANCEL_RESERVATION) {
-			cancelReservation((Reservation) guiEvent.getAllParameter().next());
-		}
+		Match(guiEvent.getType()).of(
+				Case($(LecturerGuiEvents.NEW_OTP_FOR_LECTURER), o -> API.run(() -> requestOTPFromLock((Reservation) guiEvent.getAllParameter().next(), UserAgentRoles.USER_LECTURER))),
+				Case($(LecturerGuiEvents.NEW_OTP_FOR_TECHNICIAN), o -> API.run(() -> requestOTPFromLock(new Reservation(null, (AID)guiEvent.getAllParameter().next()), UserAgentRoles.USER_TECHNICIAN))),
+				Case($(LecturerGuiEvents.ASK_FOR_RESERVATION), o -> API.run(() -> askRandomLockForReservation((ReservationDataRequest) guiEvent.getAllParameter().next()))),
+				Case($(LecturerGuiEvents.CANCEL_RESERVATION), o -> API.run(() -> cancelReservation((Reservation) guiEvent.getAllParameter().next()))),
+				Case($(LecturerGuiEvents.ACCEPT_RESERVATION_OFFER), o -> API.run(() -> confirmReservationOffer((Reservation) guiEvent.getAllParameter().next()))),
+				Case($(LecturerGuiEvents.REJECT_RESERVATION_OFFER), o -> API.run(() -> rejectReservationOffer((Reservation) guiEvent.getAllParameter().next())))
+		);
 	}
 
-	private void requestCertificateFromKeeper(final String email, String password) {
+    private void requestCertificateFromKeeper(final String email, String password) {
 		AgentResolverService agentResolverService = new AgentResolverService(this);
 		AID agent = agentResolverService.getRandomAgent(AgentTypes.KEEPER);
 
@@ -144,23 +139,22 @@ public class LecturerAgent extends GuiAgent {
 		}).onFailure(ex -> log.info("Could not send CancelReservation: {}", ex));
 	}
 
-	public void confirmReservation(@NonNull final Reservation reservation) {
+	public void confirmReservationOffer(@NonNull final Reservation reservation) {
 		reservationMessageFactory.buildConfirmReservationRequest(reservation).onSuccess(confirmReservationAclMessage -> {
 			send(confirmReservationAclMessage);
-			// addBehaviour(new AwaitLockResponseBehaviour(this, UserAgentRoles.USER_LECTURER));
 			log.info("Successfully send confirm reservation message!");
 		}).onFailure(ex -> log.info("Could not send confirm reservation message: {}", ex));
 	}
 
-	public void addReservationOffer(@NonNull final Reservation offer) {
-		//TODO: Add reservation offer to agent
-		log.info("Adding reservation offer to {}", getAID());
-
-		log.info("Sending confirm reservation message automaticly");
-		confirmReservation(offer);
-	}
+    private void rejectReservationOffer(final Reservation reservation) {
+        log.info("Reservation offer {} rejected!", reservation);
+    }
 
 	public void updateReservations() {
 		lecturerAgentGui.refreshAvailableReservations();
+	}
+
+	public void onReservationReceived(final ReservationOffer reservationOffer) {
+		lecturerAgentGui.confirmReservationOffer(reservationOffer);
 	}
 }

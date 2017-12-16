@@ -10,8 +10,10 @@ import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
 import org.wsd.ontologies.reservation.ReservationOffer;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
@@ -45,13 +47,17 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
     protected void handleAllResponses(final Vector responses, final Vector acceptances) {
         log.info("Got a total of {} offers", responses.size());
 
+        final List<ACLMessage> proposeResponses = ((Vector<ACLMessage>) responses).stream()
+                .filter(response -> response.getPerformative() == ACLMessage.PROPOSE)
+                .collect(Collectors.toList());
+
         // TODO: inform lecturer that no offers have been found
-        if (responses.isEmpty()) {
+        if (proposeResponses.isEmpty()) {
             log.info("No offers to choose from. Skipping...");
             return;
         }
 
-        final ACLMessage bestOfferMessage = ((Vector<ACLMessage>) responses).stream().filter(m -> m.getPerformative() == ACLMessage.PROPOSE)
+        final ACLMessage bestOfferMessage = proposeResponses.stream()
                 .map(response -> Pair.of(messageContentExtractor.extract(response, ReservationOffer.class).get(),
                         response))
                 .min((offer1, offer2) -> ReservationOfferService.reservationOfferScoreComparator
@@ -71,7 +77,7 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
         }).onFailure(ex -> log.info("Could not accept best offer: {}", ex));
 
         /* TODO: Handling of offer rejection ? */
-        ((Vector<ACLMessage>) responses).stream().filter(offer -> !Objects.equals(offer, bestOfferMessage))
+        proposeResponses.stream().filter(offer -> !Objects.equals(offer, bestOfferMessage))
                 .forEach(offerToReject -> {
                     reservationMessageFactory.buildOfferRejectionReply(offerToReject)
                             .onSuccess(rejectOfferAclMessage -> {
