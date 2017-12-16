@@ -25,6 +25,7 @@ public class OTPOntology extends Ontology implements OTPVocabulary {
         Try.run(() -> {
             add(new AgentActionSchema(GENERATE_OTP), GenerateOTPRequest.class);
             final AgentActionSchema generateOTPActionSchema = (AgentActionSchema) getSchema(GENERATE_OTP);
+            generateOTPActionSchema.add(CERTIFICATE, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
             generateOTPActionSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
 
             add(new ConceptSchema(GENERATED_OTP), GenerateOTPResponse.class);

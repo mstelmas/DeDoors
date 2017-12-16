@@ -14,10 +14,10 @@ public class ReservationValidator {
         /* For testing purposes:
               Lock4 - returns invalid reservation
          */
-        if (StringUtils.startsWith("lock-agent-4", ((AID)message.getAllReceiver().next()).getLocalName())) {
-            return Validation.invalid("requested reservation does not exist");
-        } else {
+        if (!StringUtils.startsWith("lock-agent-4", ((AID)message.getAllReceiver().next()).getLocalName())) {
             return Validation.valid("ok");
+        } else {
+            return Validation.invalid("requested reservation does not exist");
         }
     }
 }

@@ -21,19 +21,23 @@ public class CertificateOntology extends Ontology implements CertificateVocabula
         super(ONTOLOGY_NAME, BasicOntology.getInstance());
 
         Try.run(() -> {
-            AgentActionSchema as;
-            add(as = new AgentActionSchema(ASK_FOR_CERIFICATE), AskForCertificateRequest.class);
-            as.add(EMAIL, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-            as.add(PASSOWRD, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-
-            add(as = new AgentActionSchema(ASK_FOR_CERIFICATE), AskForCertificateResponse.class);
-            as.add(CERIFICATE, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-
-            add(as = new AgentActionSchema(ASK_FOR_PERMISSIONS), AskForPermissionsRequest.class);
-
-            add(as = new AgentActionSchema(ASK_FOR_PERMISSIONS), AskForPermissionsResponse.class);
-            as.add(PERSMISSIONS, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-
+            {
+                add(new AgentActionSchema(ASK_FOR_CERIFICATE_REQUEST), AskForCertificateRequest.class);
+                AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_CERIFICATE_REQUEST);
+                aas.add(EMAIL, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+                aas.add(PASSOWRD, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+            }
+            {
+                add(new AgentActionSchema(ASK_FOR_CERIFICATE_RESPONSE), AskForCertificateResponse.class);
+                AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_CERIFICATE_RESPONSE);
+                aas.add(CERIFICATE, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
+            }
+            add(new AgentActionSchema(ASK_FOR_PERMISSIONS_REQUEST), AskForPermissionsRequest.class);
+            {
+                add(new AgentActionSchema(ASK_FOR_PERMISSIONS_RESPONSE), AskForPermissionsResponse.class);
+                AgentActionSchema aas = (AgentActionSchema) getSchema(ASK_FOR_PERMISSIONS_RESPONSE);
+                aas.add(PERSMISSIONS, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
+            }
         }).onFailure(ex -> log.error("Could not create Reservation ontology schema {}", ex));
     }
 }

@@ -11,6 +11,6 @@ import lombok.experimental.Wither;
 @Wither
 @Data
 public class AskForPermissionsResponse implements Concept {
-    private String privateKey;
+    private String permissions;
 }
 

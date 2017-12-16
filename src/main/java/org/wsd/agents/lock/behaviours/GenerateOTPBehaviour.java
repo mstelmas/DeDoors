@@ -46,7 +46,7 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
 
         final GenerateOTPRequest generateOTPRequest = maybeGenerateOTPRequest.get();
 
-        final Validation<Seq<String>, String> otpValidationResult = lockValidationService.validateGenerateOTPRequest(otpRequestMessage, generateOTPRequest);
+        final Validation<Seq<String>, String> otpValidationResult = lockValidationService.validateGenerateOTPRequest(agent, otpRequestMessage, generateOTPRequest);
 
         Match(otpValidationResult).of(
                 Case($Valid($()), o -> run(() -> acceptOTPGenerationRequest(generateOTPRequest))),
