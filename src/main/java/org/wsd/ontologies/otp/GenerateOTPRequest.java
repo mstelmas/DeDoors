@@ -12,5 +12,6 @@ import lombok.experimental.Wither;
 @Wither
 @Data
 public class GenerateOTPRequest implements AgentAction {
+    private String certificate;
     @Getter private Integer reservationId;
 }

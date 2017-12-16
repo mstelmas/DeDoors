@@ -1,23 +1,26 @@
 package org.wsd.agents.lock.validators;
 
 import io.vavr.control.Validation;
-import jade.content.AgentAction;
-import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.wsd.agents.lock.LockAgent;
+import org.wsd.ontologies.otp.GenerateOTPRequest;
 
+@Slf4j
 public class PermissionValidator {
 
-    /* TODO: implement (check if agent has permissions for a requested action) */
-    public Validation<String, String> validateActionPermissions(@NonNull final ACLMessage message, @NonNull final AgentAction agentAction) {
-        /* For testing purposes:
-              Lock3 - returns invalid permissions
-         */
-        if (StringUtils.startsWith("lock-agent-3", ((AID)message.getAllReceiver().next()).getLocalName())) {
-            return Validation.invalid("bad credentials");
-        } else {
+    public Validation<String, String> validateActionPermissions(LockAgent agent, @NonNull final ACLMessage message, @NonNull final GenerateOTPRequest generateOTPRequest) {
+        final String certificate = generateOTPRequest.getCertificate();
+        final int level = Integer.parseInt(certificate.replace("privateKeyLevel",""));
+
+        String requiredAuthorization = agent.getRequiredAuthorization();
+        final int requiredLevel = Integer.parseInt(requiredAuthorization.replace("Level", ""));
+
+        if (level >= requiredLevel) {
             return Validation.valid("ok");
+        } else {
+            return Validation.invalid("AuthorizationLevel is not enough");
         }
     }
 }

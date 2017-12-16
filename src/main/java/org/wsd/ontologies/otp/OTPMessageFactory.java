@@ -16,7 +16,7 @@ public class OTPMessageFactory {
 
     private final ConversationIdGenerator conversationIdGenerator = new ConversationIdGenerator();
 
-    public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver, final Integer reservationId) {
+    public Try<ACLMessage> buildGenerateOTPRequest(@NonNull final AID receiver, final String certificate, final Integer reservationId) {
         final ACLMessage otpRequestMessage = new ACLMessage(ACLMessage.REQUEST);
 
         otpRequestMessage.addReceiver(receiver);
@@ -25,7 +25,8 @@ public class OTPMessageFactory {
         otpRequestMessage.setConversationId(conversationIdGenerator.generate());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpRequestMessage, new Action(receiver, new GenerateOTPRequest().withReservationId(reservationId)));
+            agent.getContentManager().fillContent(otpRequestMessage, new Action(receiver,
+                    new GenerateOTPRequest().withCertificate(certificate).withReservationId(reservationId)));
             return otpRequestMessage;
         });
     }
@@ -38,7 +39,8 @@ public class OTPMessageFactory {
         otpResponseMessage.setOntology(OTPOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequestMessage.getSender(), new GenerateOTPResponse().withOtpCode(otpCode).withReservationId(reservationId)));
+            agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequestMessage.getSender(),
+                    new GenerateOTPResponse().withOtpCode(otpCode).withReservationId(reservationId)));
             return otpResponseMessage;
         });
     }
@@ -51,7 +53,8 @@ public class OTPMessageFactory {
         otpResponseMessage.setOntology(OTPOntology.instance.getName());
 
         return Try.of(() -> {
-            agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequestMessage.getSender(), new RefuseOTPGenerationResponse().withRejectionReasons(rejectionReason)));
+            agent.getContentManager().fillContent(otpResponseMessage, new Action(otpRequestMessage.getSender(),
+                    new RefuseOTPGenerationResponse().withRejectionReasons(rejectionReason)));
             return otpResponseMessage;
         });
     }

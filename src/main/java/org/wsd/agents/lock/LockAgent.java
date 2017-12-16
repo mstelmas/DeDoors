@@ -40,6 +40,8 @@ public class LockAgent extends GuiAgent {
 
     @Setter
     private String permissions = "";
+    @Getter
+    private String requiredAuthorization = "Level0";
 
     private final MessageTemplate RESERVATION_CNP_MESSAGE_TEMPLATE = MessageTemplate.and(
             MessageTemplate.and(

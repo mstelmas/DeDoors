@@ -18,14 +18,14 @@ public class LockValidationService {
               Lock3 - returns invalid permissions
               Lock4 - returns invalid reservation
          */
-    public Validation<Seq<String>, String> validateGenerateOTPRequest(final ACLMessage generateOTPMessage, final GenerateOTPRequest generateOTPRequest) {
+    public Validation<Seq<String>, String> validateGenerateOTPRequest(LockAgent agent, final ACLMessage generateOTPMessage, final GenerateOTPRequest generateOTPRequest) {
         final Reservation requestedReservation = Reservation.builder()
                 .id(generateOTPRequest.getReservationId())
                 .agent(generateOTPMessage.getSender())
                 .build();
 
         return Validation.combine(
-                permissionValidator.validateActionPermissions(generateOTPMessage, generateOTPRequest),
+                permissionValidator.validateActionPermissions(agent, generateOTPMessage, generateOTPRequest),
                 reservationValidator.validateReservationExists(generateOTPMessage, requestedReservation)
         ).ap((a, b) -> "Valid");
     }

@@ -105,7 +105,7 @@ public class LecturerAgent extends GuiAgent {
 	private void requestOTPFromLock(@NonNull final Reservation reservation, final UserAgentRoles userAgentRole) {
 		log.info("Requesting OTP for reservation: {}", reservation);
 
-		otpMessageFactory.buildGenerateOTPRequest(reservation.getLock(), reservation.getId()).onSuccess(otpRequestAclMessage -> {
+		otpMessageFactory.buildGenerateOTPRequest(reservation.getLock(), certificate,reservation.getId()).onSuccess(otpRequestAclMessage -> {
 			send(otpRequestAclMessage);
 			addBehaviour(new AwaitLockResponseBehaviour(this, userAgentRole));
 			log.info("GenerateOTPRequest successfully sent!");
