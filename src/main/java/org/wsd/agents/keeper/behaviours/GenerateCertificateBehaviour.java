@@ -34,7 +34,7 @@ public class GenerateCertificateBehaviour extends OneShotBehaviour {
         final Optional<AskForCertificateRequest> request = messageContentExtractor.extract(requestMessage, AskForCertificateRequest.class);
 
         if (!request.isPresent()) {
-            log.info("Could not extract GenerateOTPRequest content");
+            log.info("Could not extract AskForCertificateRequest content");
             return;
         }
 

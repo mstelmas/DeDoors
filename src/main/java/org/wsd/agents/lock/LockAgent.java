@@ -1,17 +1,24 @@
 package org.wsd.agents.lock;
 
+import jade.core.AID;
 import jade.domain.FIPANames;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.wsd.AgentResolverService;
+import org.wsd.agents.AgentTypes;
 import org.wsd.agents.lock.behaviours.LockOTPMessageHandler;
 import org.wsd.agents.lock.behaviours.LockReservationMessageHandler;
+import org.wsd.agents.lock.behaviours.PermissionsHandler;
 import org.wsd.agents.lock.behaviours.ReservationCNPLockBehaviour;
 import org.wsd.agents.lock.gui.LockAgentGui;
 import org.wsd.agents.lock.otp.OtpStateService;
+import org.wsd.ontologies.certificate.CertificateMessageFactory;
+import org.wsd.ontologies.certificate.CertificateOntology;
 import org.wsd.ontologies.otp.OTPOntology;
 import org.wsd.ontologies.reservation.ReservationOntology;
 
@@ -31,6 +38,9 @@ public class LockAgent extends GuiAgent {
 
     private int nextReservationId = 0;
 
+    @Setter
+    private String permissions = "";
+
     private final MessageTemplate RESERVATION_CNP_MESSAGE_TEMPLATE = MessageTemplate.and(
             MessageTemplate.and(
                     MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
@@ -49,12 +59,19 @@ public class LockAgent extends GuiAgent {
 
         getContentManager().registerLanguage(ReservationOntology.codec);
         getContentManager().registerOntology(ReservationOntology.instance);
+
+        getContentManager().registerLanguage(CertificateOntology.codec);
+        getContentManager().registerOntology(CertificateOntology.instance);
         
         addBehaviour(new LockOTPMessageHandler(this));
         addBehaviour(new LockReservationMessageHandler(this));
         addBehaviour(new ReservationCNPLockBehaviour(this, RESERVATION_CNP_MESSAGE_TEMPLATE));
+        addBehaviour(new PermissionsHandler(this));
 
         SwingUtilities.invokeLater(() -> lockAgentGui = new LockAgentGui(this));
+
+        if (permissions == "")
+            requestPermissionsFromKeeper();
     }
 
     @Override
@@ -82,5 +99,17 @@ public class LockAgent extends GuiAgent {
     public int getNextId() {
         nextReservationId++;
         return nextReservationId;
+    }
+
+    private void requestPermissionsFromKeeper() {
+        AgentResolverService agentResolverService = new AgentResolverService(this);
+        AID agent = agentResolverService.getRandomAgent(AgentTypes.KEEPER);
+
+        CertificateMessageFactory certificateMessageFactory = new CertificateMessageFactory(this);
+        certificateMessageFactory.buildAskForPermissionsRequest(agent).onSuccess(requestAclMessage -> {
+            send(requestAclMessage);
+
+            log.info("AskForPermissionsRequest successfully sent!");
+        }).onFailure(ex -> log.info("Could not send AskForPermissionsRequest: {}", ex));
     }
 }

@@ -43,4 +43,32 @@ public class CertificateMessageFactory {
             return responseMessage;
         });
     }
+
+    public Try<ACLMessage> buildAskForPermissionsRequest(@NonNull final AID receiver) {
+        final ACLMessage requestMessage = new ACLMessage(ACLMessage.REQUEST);
+
+        requestMessage.addReceiver(receiver);
+        requestMessage.setLanguage(CertificateOntology.codec.getName());
+        requestMessage.setOntology(CertificateOntology.instance.getName());
+
+        return Try.of(() -> {
+            agent.getContentManager().fillContent(requestMessage,
+                    new Action(receiver, new AskForPermissionsRequest()));
+            return requestMessage;
+        });
+    }
+
+    public Try<ACLMessage> buildAskForPermissionsResponse(@NonNull final AID receiver, String permissions) {
+        final ACLMessage responseMessage = new ACLMessage(ACLMessage.INFORM_IF);
+
+        responseMessage.addReceiver(receiver);
+        responseMessage.setLanguage(CertificateOntology.codec.getName());
+        responseMessage.setOntology(CertificateOntology.instance.getName());
+
+        return Try.of(() -> {
+            agent.getContentManager().fillContent(responseMessage, new Action(receiver, new AskForPermissionsResponse()
+                    .withPermissions(permissions)));
+            return responseMessage;
+        });
+    }
 }
