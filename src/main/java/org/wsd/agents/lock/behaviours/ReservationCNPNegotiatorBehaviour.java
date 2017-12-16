@@ -1,19 +1,18 @@
 package org.wsd.agents.lock.behaviours;
 
-import java.util.Objects;
-import java.util.Vector;
-
+import jade.core.AID;
+import jade.core.Agent;
+import jade.lang.acl.ACLMessage;
+import jade.proto.ContractNetInitiator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.wsd.agents.lock.reservations.ReservationOfferService;
 import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
 import org.wsd.ontologies.reservation.ReservationOffer;
 
-import jade.core.AID;
-import jade.core.Agent;
-import jade.lang.acl.ACLMessage;
-import jade.proto.ContractNetInitiator;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+import java.util.Vector;
 
 @Slf4j
 public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
@@ -61,8 +60,6 @@ public class ReservationCNPNegotiatorBehaviour extends ContractNetInitiator {
                 .map(Pair::getRight).get(); /* this should be safe and is guarded by an empty list check above */
 
         log.info("Best offer was provided by agent {}", bestOfferMessage.getSender().getLocalName());
-
-        acceptances.add(bestOfferMessage);
 
         /* TODO:
          *   1. maybe move accepting/rejecting offers into separate (parallel) behaviours?

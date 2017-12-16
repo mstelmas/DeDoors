@@ -16,8 +16,6 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
-import javax.security.auth.callback.ConfirmationCallback;
-
 @Slf4j
 @RequiredArgsConstructor
 public class ReservationMessageFactory {
@@ -46,7 +44,7 @@ public class ReservationMessageFactory {
 		cfpRequestMessage.setLanguage(ReservationOntology.codec.getName());
 		cfpRequestMessage.setOntology(ReservationOntology.instance.getName());
 		return Try.of(() -> {
-			agent.getContentManager().fillContent(cfpRequestMessage, new Action((AID)cfpRequestMessage.getAllReceiver().next(), data));
+			agent.getContentManager().fillContent(cfpRequestMessage, new Action(new AID("*", AID.ISGUID), data));
 			log.info("{}", data);
 			return cfpRequestMessage;
 		});
