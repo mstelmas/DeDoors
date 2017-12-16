@@ -18,6 +18,7 @@ public class LockConfigurationProvider {
     private final String IS_LABORATORY_KEY = "is.laboratory";
     private final String HAS_MULTIMEDIA_PROJECTOR_KEY = "has.multimedia.projector";
     private final String HAS_TV_KEY = "has.tv";
+    private final String AREA_KEY = "area";
 
     private final Configurations configurations = new Configurations();
 
@@ -43,11 +44,12 @@ public class LockConfigurationProvider {
     private LockConfiguration buildLockConfigurationFromProperties(final PropertiesConfiguration propertiesConfiguration) {
         return LockConfiguration.builder()
                 .numberOfSeats(propertiesConfiguration.getInt(NUM_OF_SEATS_KEY, 0))
-                .numberOfComputers(propertiesConfiguration.getInteger(NUM_OF_COMPUTERS_KEY, null))
-                .isSeminaryHall(propertiesConfiguration.getBoolean(IS_SEMINARY_HALL_KEY, null))
-                .isLaboratory(propertiesConfiguration.getBoolean(IS_LABORATORY_KEY, null))
-                .hasMultimediaProjector(propertiesConfiguration.getBoolean(HAS_MULTIMEDIA_PROJECTOR_KEY, null))
-                .hasTV(propertiesConfiguration.getBoolean(HAS_TV_KEY, null))
+                .numberOfComputers(propertiesConfiguration.getInteger(NUM_OF_COMPUTERS_KEY, 0))
+                .isSeminaryHall(propertiesConfiguration.getBoolean(IS_SEMINARY_HALL_KEY, false))
+                .isLaboratory(propertiesConfiguration.getBoolean(IS_LABORATORY_KEY, false))
+                .hasMultimediaProjector(propertiesConfiguration.getBoolean(HAS_MULTIMEDIA_PROJECTOR_KEY, false))
+                .hasTV(propertiesConfiguration.getBoolean(HAS_TV_KEY, false))
+                .area(propertiesConfiguration.getInteger(AREA_KEY, 0))
                 .build();
     }
 }

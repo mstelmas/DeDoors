@@ -12,4 +12,5 @@ public class LockConfiguration {
     private Boolean isLaboratory;
     private Boolean hasMultimediaProjector;
     private Boolean hasTV;
+    private Integer area;
 }
