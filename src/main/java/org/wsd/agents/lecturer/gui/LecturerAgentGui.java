@@ -338,4 +338,8 @@ public class LecturerAgentGui extends JFrame {
     public final void cancelReservationSucceesInfo() {
         JOptionPane.showMessageDialog(this, "Reservation succesfully cancelled");
     }
+
+    public final void cancelReservationFailureInfo() {
+        JOptionPane.showMessageDialog(this, "Reservation could not be cancelled");
+    }
 }

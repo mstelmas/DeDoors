@@ -101,7 +101,8 @@ public class ReservationResponseHandler extends CyclicBehaviour {
 
     private void handleRefusalToCancelReservation(final AID lock, final RefuseReservationCancelationResponse refuseReservationCancelationResponse) {
         log.info("Lock {} refused to cancel reservation {}!", lock.getLocalName(), refuseReservationCancelationResponse.getReservationId());
-        /* TODO: implement */
+        agent.updateReservations();
+        agent.onReservationNotCanceled();
     }
 
 }

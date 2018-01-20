@@ -163,4 +163,8 @@ public class LecturerAgent extends GuiAgent {
 	public void onReservationCanceled() {
 		lecturerAgentGui.cancelReservationSucceesInfo();
 	}
+
+	public void onReservationNotCanceled() {
+		lecturerAgentGui.cancelReservationFailureInfo();
+	}
 }

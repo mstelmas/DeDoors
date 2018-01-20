@@ -3,7 +3,9 @@ package org.wsd.agents.lock.behaviours;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.LocalDateTime;
 import org.wsd.agents.lock.LockAgent;
+import org.wsd.agents.lock.reservations.ReservationStateService;
 import org.wsd.ontologies.reservation.CancelReservationRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
 
@@ -24,11 +26,21 @@ public class CancelReservationBehaviour extends OneShotBehaviour {
 
     @Override
     public void action() {
-        /* TODO: INFORM/REFUSE reservation cancelation based on validation */
-        reservationMessageFactory.buildCancelReservationInformResponse(cancelReservationMessage, cancelReservationRequest.getReservationId())
-                .onSuccess(agent::send)
-                .onFailure(ex -> {
-                    log.error("Could not send CancelReservationMessage Inform: {}", ex);
-                });
+        final ReservationStateService reservationStateService = agent.getReservationStateService();
+        final LocalDateTime reservationStartDate = reservationStateService.getReservationDate(cancelReservationRequest.getReservationId());
+
+        if (LocalDateTime.now().isAfter(reservationStartDate)) {
+            reservationMessageFactory.buildCancelReservationRefuseResponse(cancelReservationMessage, cancelReservationRequest.getReservationId())
+                    .onSuccess(agent::send)
+                    .onFailure(ex -> {
+                        log.error("Could not send CancelReservationRefuseMessage Cancel: {}", ex);
+                    });
+        } else {
+            reservationMessageFactory.buildCancelReservationInformResponse(cancelReservationMessage, cancelReservationRequest.getReservationId())
+                    .onSuccess(agent::send)
+                    .onFailure(ex -> {
+                        log.error("Could not send CancelReservationMessage Inform: {}", ex);
+                    });
+        }
     }
 }
