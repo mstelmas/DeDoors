@@ -27,6 +27,10 @@ public class LockValidationService {
                 .agent(generateOTPMessage.getSender())
                 .build();
 
+        if (requestedReservation.getId() == null) {
+            return Validation.valid("Valid");
+        }
+
         return Validation.combine(
                 permissionValidator.validateActionPermissions(agent, generateOTPMessage, generateOTPRequest),
                 reservationValidator.validateReservationExists(generateOTPMessage, requestedReservation)
