@@ -12,7 +12,8 @@ import org.joda.time.LocalDateTime;
 @AllArgsConstructor
 public class Reservation {
     private Integer id;
-    private LocalDateTime dateOfReservation;
+    private LocalDateTime startOfReservation;
+    private LocalDateTime endOfReservation;
     private AID agent;
     private ReservationState reservationState;
 }

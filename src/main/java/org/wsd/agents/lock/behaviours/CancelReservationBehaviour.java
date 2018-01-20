@@ -27,7 +27,7 @@ public class CancelReservationBehaviour extends OneShotBehaviour {
     @Override
     public void action() {
         final ReservationStateService reservationStateService = agent.getReservationStateService();
-        final LocalDateTime reservationStartDate = reservationStateService.getReservationDate(cancelReservationRequest.getReservationId());
+        final LocalDateTime reservationStartDate = reservationStateService.getReservationStartDate(cancelReservationRequest.getReservationId());
 
         if (LocalDateTime.now().isAfter(reservationStartDate)) {
             reservationMessageFactory.buildCancelReservationRefuseResponse(cancelReservationMessage, cancelReservationRequest.getReservationId())

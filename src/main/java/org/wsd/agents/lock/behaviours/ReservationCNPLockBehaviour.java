@@ -67,7 +67,8 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
                     .agent(agent.getAID())
                     .id(reservationId)
                     .reservationState(ReservationState.RESERVED)
-                    .dateOfReservation(LocalDateTime.fromDateFields(reservationDataRequest.get().getDateSince()))
+                    .startOfReservation(LocalDateTime.fromDateFields(reservationDataRequest.get().getDateSince()))
+                    .endOfReservation(LocalDateTime.fromDateFields(reservationDataRequest.get().getDateTo()))
                     .build();
 
             reservationStateService.add(reservation);
@@ -125,6 +126,11 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
             if(request.getIsMultimediaProjectorRequired() && !lockConfig.getHasMultimediaProjector())
                 return false;
         }
+
+        if (!agent.getReservationStateService().reservationAvailable(request.getDateSince(), request.getDateTo())) {
+            return false;
+        }
+
         return true;
     }
 }
