@@ -7,6 +7,7 @@ import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lock.LockAgent;
 import org.wsd.agents.lock.LockValidationService;
+import org.wsd.agents.lock.validators.ReservationValidator;
 import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.otp.GenerateOTPRequest;
 import org.wsd.ontologies.otp.OTPMessageFactory;
@@ -24,7 +25,7 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
 
     private final LockAgent agent;
     private final OTPMessageFactory otpMessageFactory;
-    private final LockValidationService lockValidationService = new LockValidationService();
+    private final LockValidationService lockValidationService;
     private final MessageContentExtractor messageContentExtractor;
 
     public GenerateOTPBehaviour(final LockAgent agent, final ACLMessage otpRequestMessage) {
@@ -33,6 +34,7 @@ public class GenerateOTPBehaviour extends OneShotBehaviour {
         this.otpRequestMessage = otpRequestMessage;
         this.otpMessageFactory = new OTPMessageFactory(agent);
         this.messageContentExtractor = new MessageContentExtractor(agent);
+        this.lockValidationService = new LockValidationService(new ReservationValidator(agent.getReservationStateService()));
     }
 
     @Override

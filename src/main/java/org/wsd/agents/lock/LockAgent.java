@@ -18,6 +18,7 @@ import org.wsd.agents.lock.behaviours.ReservationCNPLockBehaviour;
 import org.wsd.agents.lock.configuration.LockConfigurationProvider;
 import org.wsd.agents.lock.gui.LockAgentGui;
 import org.wsd.agents.lock.otp.OtpStateService;
+import org.wsd.agents.lock.reservations.ReservationStateService;
 import org.wsd.ontologies.certificate.CertificateMessageFactory;
 import org.wsd.ontologies.certificate.CertificateOntology;
 import org.wsd.ontologies.otp.OTPOntology;
@@ -36,6 +37,9 @@ public class LockAgent extends GuiAgent {
 
     @Getter
     private final OtpStateService otpStateService = new OtpStateService();
+
+    @Getter
+    private final ReservationStateService reservationStateService = new ReservationStateService();
 
     private int nextReservationId = 0;
 

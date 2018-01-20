@@ -1,20 +1,20 @@
 package org.wsd.agents.lock.validators;
 
 import io.vavr.control.Validation;
-import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
+import lombok.RequiredArgsConstructor;
 import org.wsd.agents.lock.reservations.Reservation;
+import org.wsd.agents.lock.reservations.ReservationStateService;
 
+@RequiredArgsConstructor
 public class ReservationValidator {
+
+    private final ReservationStateService reservationStateService;
 
     /* TODO: implement (check if agent's requested reservation exists) */
     public Validation<String, String> validateReservationExists(@NonNull final ACLMessage message, @NonNull final Reservation reservation) {
-        /* For testing purposes:
-              Lock4 - returns invalid reservation
-         */
-        if (!StringUtils.startsWith("lock-agent-4", ((AID)message.getAllReceiver().next()).getLocalName())) {
+        if (reservationStateService.exists(reservation)) {
             return Validation.valid("ok");
         } else {
             return Validation.invalid("requested reservation does not exist");

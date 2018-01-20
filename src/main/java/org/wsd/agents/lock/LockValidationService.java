@@ -3,15 +3,18 @@ package org.wsd.agents.lock;
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import jade.lang.acl.ACLMessage;
+import lombok.RequiredArgsConstructor;
 import org.wsd.agents.lock.reservations.Reservation;
 import org.wsd.agents.lock.validators.PermissionValidator;
 import org.wsd.agents.lock.validators.ReservationValidator;
 import org.wsd.ontologies.otp.GenerateOTPRequest;
 
+@RequiredArgsConstructor
 public class LockValidationService {
 
     private final PermissionValidator permissionValidator = new PermissionValidator();
-    private final ReservationValidator reservationValidator = new ReservationValidator();
+    private final ReservationValidator reservationValidator;
+
 
     /* For testing purposes:
               Lock1/Lock2 - both successfully generate OTP

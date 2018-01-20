@@ -68,7 +68,7 @@ public class LockReservationMessageHandler extends CyclicBehaviour {
 		case ACLMessage.CONFIRM:
 			Match(action).of(
 				Case($(instanceOf(ConfirmReservationRequest.class)), o-> run(
-							() -> agent.addBehaviour(new ConfirmReservationBehaviour(agent, message, (ConfirmReservationRequest) action)))),
+							() -> agent.addBehaviour(new ConfirmReservationBehaviour(agent, message, (ConfirmReservationRequest) action, agent.getReservationStateService())))),
 				Case($(), o -> run(() -> replyNotUnderstood(message))));
 		break;
 		default:

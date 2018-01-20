@@ -40,7 +40,7 @@ public class LockAgentGui extends JFrame {
         this.setLocationByPlatform(true);
         this.pack();
         /* TODO: Lock GUI temporary invisible for testing purposes */
-//        this.setVisible(true);
+        this.setVisible(true);
     }
 
     /* For easier GUI development */
