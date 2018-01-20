@@ -4,7 +4,6 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.wsd.agents.lock.LockAgent;
-import org.wsd.agents.lock.reservations.Reservation;
 import org.wsd.agents.lock.reservations.ReservationStateService;
 import org.wsd.ontologies.reservation.ConfirmReservationRequest;
 import org.wsd.ontologies.reservation.ReservationMessageFactory;
@@ -31,7 +30,7 @@ public class ConfirmReservationBehaviour extends OneShotBehaviour {
         reservationMessageFactory.buildConfirmReservationInformResponse(confirmReservationMessage, confirmReservationRequest.getReservationId())
                 .onSuccess(message -> {
                     agent.send(message);
-                    reservationStateService.add(new Reservation(confirmReservationRequest.getReservationId(), confirmReservationMessage.getSender()));
+                    reservationStateService.confirm(confirmReservationRequest.getReservationId());
                 })
                 .onFailure(ex -> {
                     log.error("Could not send ConfirmReservationMessage Inform: {}", ex);

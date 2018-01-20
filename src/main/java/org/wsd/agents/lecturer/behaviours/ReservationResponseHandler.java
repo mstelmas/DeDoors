@@ -78,7 +78,7 @@ public class ReservationResponseHandler extends CyclicBehaviour {
     private void onReservationReceived(ACLMessage message) {
         log.info("Received reservation offer from NEGOTIATOR {}", message);
         messageContentExtractor.extract(message, ReservationOffer.class).ifPresent(offer -> {
-            Reservation reservation = new Reservation(offer.getId(), offer.getLockAID());
+            Reservation reservation = new Reservation(offer.getReservationId(), offer.getLockAID());
             agent.onReservationReceived(offer);
         });
 

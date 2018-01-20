@@ -12,17 +12,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class ReservationOffer implements Concept {
+    private int reservationId;
     private int score;
     private int numberOfSeats;
     private int numberOfComputers;
     private AID lockAID;
-    private int id;
 
-    public ReservationOffer(int score, LockConfiguration configuration, AID lockAID, int id){
+    public ReservationOffer(int reservationId, int score, LockConfiguration configuration, AID lockAID){
+        this.reservationId = reservationId;
         this.score = score;
         this.numberOfComputers = configuration.getNumberOfComputers();
         this.numberOfSeats = configuration.getNumberOfSeats();
         this.lockAID = lockAID;
-        this.id = id;
     }
 }

@@ -24,6 +24,7 @@
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <guava.version>23.0</guava.version>
         <miglayout.version>3.7.4</miglayout.version>
+        <joda-time.version>2.9.9</joda-time.version>
     </properties>
 
     <repositories>
@@ -148,6 +149,11 @@
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout</artifactId>
             <version>${miglayout.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda-time.version}</version>
         </dependency>
     </dependencies>
 

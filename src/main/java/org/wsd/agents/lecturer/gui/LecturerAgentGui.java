@@ -269,7 +269,7 @@ public class LecturerAgentGui extends JFrame {
                         "Seats: %d\n" +
                         "Computers: %d\n" +
                         "Cost: %d\n\n",
-                        reservationOffer.getLockAID().getLocalName(), reservationOffer.getId(),
+                        reservationOffer.getLockAID().getLocalName(), reservationOffer.getReservationId(),
                         reservationOffer.getNumberOfSeats(), reservationOffer.getNumberOfComputers(),
                         reservationOffer.getScore()),
                 "Reservation offer",
@@ -280,7 +280,7 @@ public class LecturerAgentGui extends JFrame {
                 choices[0]
         );
 
-        final Reservation reservation = new Reservation(reservationOffer.getId(), reservationOffer.getLockAID());
+        final Reservation reservation = new Reservation(reservationOffer.getReservationId(), reservationOffer.getLockAID());
 	    if (choice == JOptionPane.YES_OPTION) {
             final GuiEvent acceptReservationOfferEvent = new GuiEvent(this, LecturerGuiEvents.ACCEPT_RESERVATION_OFFER);
             acceptReservationOfferEvent.addParameter(reservation);

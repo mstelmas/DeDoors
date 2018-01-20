@@ -41,6 +41,7 @@ public class ReservationOntology extends Ontology implements ReservationVocabula
 
 			final ConceptSchema reservationOfferConceptSchema = (ConceptSchema) getSchema(RESERVATION_OFFER);
 			reservationOfferConceptSchema.add(RESERVATION_OFFER_SCORE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+			reservationOfferConceptSchema.add(RESERVATION_ID, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
 			reservationOfferConceptSchema.add(NUMBER_OF_COMPUTERS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
 			reservationOfferConceptSchema.add(NUMBER_OF_SEATS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.OPTIONAL);
 			reservationOfferConceptSchema.add(LOCK_AID, (ConceptSchema) getSchema(BasicOntology.AID), ObjectSchema.MANDATORY);

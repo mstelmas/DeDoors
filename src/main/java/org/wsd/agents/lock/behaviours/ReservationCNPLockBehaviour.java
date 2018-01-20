@@ -1,9 +1,13 @@
 package org.wsd.agents.lock.behaviours;
 
+import org.joda.time.LocalDateTime;
 import org.wsd.agents.lock.LockAgent;
 import org.wsd.agents.lock.configuration.LockConfiguration;
 import org.wsd.agents.lock.configuration.LockConfigurationProvider;
+import org.wsd.agents.lock.reservations.Reservation;
 import org.wsd.agents.lock.reservations.ReservationOfferService;
+import org.wsd.agents.lock.reservations.ReservationState;
+import org.wsd.agents.lock.reservations.ReservationStateService;
 import org.wsd.agents.lock.validators.PermissionValidator;
 import org.wsd.ontologies.MessageContentExtractor;
 import org.wsd.ontologies.reservation.ReservationDataRequest;
@@ -14,6 +18,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetResponder;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 @Slf4j
 public class ReservationCNPLockBehaviour extends ContractNetResponder {
@@ -37,7 +43,9 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
     protected ACLMessage handleCfp(final ACLMessage cfp) {
         log.info("Handling reservation CFP from {} for reservation request: {}", cfp.getSender(), cfp);
 
-        boolean meetsRequirements = messageContentExtractor.extract(cfp, ReservationDataRequest.class).map(request -> {
+        final Optional<ReservationDataRequest> reservationDataRequest = messageContentExtractor.extract(cfp, ReservationDataRequest.class);
+
+        boolean meetsRequirements = reservationDataRequest.map(request -> {
                 return lockConfigurationProvider.provide().map(lockConfig -> {
                     return isMeetingRequirements(request, lockConfig);
                 }).orElseGet(() -> {
@@ -52,13 +60,27 @@ public class ReservationCNPLockBehaviour extends ContractNetResponder {
             1. refactor
         */
         if(meetsRequirements) {
-            return lockConfigurationProvider.provide().map(lockConfiguration -> messageContentExtractor
-                    .extract(cfp, ReservationDataRequest.class)
-                    .map(reservationDataRequest -> reservationMessageFactory.buildReservationOfferReply(cfp,
-                            new ReservationOffer(
-                                    reservationOfferService.scoreOffer(reservationDataRequest, lockConfiguration),
-                                    lockConfiguration, agent.getAID(), agent.getNextId()))
-                            .getOrElse(() -> null))
+            final ReservationStateService reservationStateService = agent.getReservationStateService();
+            final int reservationId = agent.getNextId();
+
+            final Reservation reservation = Reservation.builder()
+                    .agent(agent.getAID())
+                    .id(reservationId)
+                    .reservationState(ReservationState.RESERVED)
+                    .dateOfReservation(LocalDateTime.fromDateFields(reservationDataRequest.get().getDateSince()))
+                    .build();
+
+            reservationStateService.add(reservation);
+
+            return lockConfigurationProvider.provide()
+                    .map(lockConfiguration ->
+                            reservationDataRequest
+                                    .map(r -> {
+                                        return reservationMessageFactory.buildReservationOfferReply(
+                                                cfp,
+                                                new ReservationOffer(reservationId, reservationOfferService.scoreOffer(r, lockConfiguration), lockConfiguration, agent.getAID())
+                                        ).getOrElse(() -> null);
+                                    })
                     .orElseGet(() -> null)).orElseGet(() -> null);
         } else {
             log.info("Refusing reservation");
