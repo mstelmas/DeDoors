@@ -159,4 +159,8 @@ public class LecturerAgent extends GuiAgent {
 	public void onReservationReceived(final ReservationOffer reservationOffer) {
 		lecturerAgentGui.confirmReservationOffer(reservationOffer);
 	}
+
+	public void onReservationCanceled() {
+		lecturerAgentGui.cancelReservationSucceesInfo();
+	}
 }
